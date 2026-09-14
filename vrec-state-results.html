@@ -1,0 +1,1240 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>V-Rec · State Results</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --bg: #050a0e;
+        --surface: #0c1419;
+        --surface2: #111d25;
+        --border: #1a2e3a;
+        --border2: #1f3545;
+        --text: #e8f4f0;
+        --muted: #5a8a7a;
+        --accent: #00e5a0;
+        --accent2: #00b4d8;
+        --gold: #f4c842;
+        --red: #ff4b5c;
+        --adc: #ff6b00;
+        --apc: #0080ff;
+        --pdp: #e80020;
+        --lp: #228b22;
+        --nnpp: #8b5cf6;
+        --others: #94a3b8;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Outfit", sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          radial-gradient(
+            ellipse 80% 50% at 20% -10%,
+            rgba(255, 107, 0, 0.05) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 60% 40% at 80% 110%,
+            rgba(0, 180, 216, 0.05) 0%,
+            transparent 60%
+          );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2rem;
+        height: 56px;
+        background: rgba(5, 10, 14, 0.92);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border);
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+         font-family: "Open Sans", sans-serif;
+        font-weight: 800;
+        font-size: 1.15rem;
+        letter-spacing: -0.02em;
+      }
+      .logo-mark {
+        width: 28px;
+        height: 28px;
+        background: var(--accent);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #050a0e;
+      }
+      .logo span {
+        color: var(--accent);
+      }
+      .live-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 75, 92, 0.12);
+        border: 1px solid rgba(255, 75, 92, 0.3);
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.68rem;
+        color: var(--red);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .live-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--red);
+        border-radius: 50%;
+        animation: pulse 1.4s ease infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(0.7);
+        }
+      }
+      .nav-links {
+        display: flex;
+        gap: 0;
+      }
+      .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.82rem;
+        padding: 6px 14px;
+        border-radius: 6px;
+        transition: all 0.2s;
+        font-weight: 500;
+      }
+      .nav-links a:hover,
+      .nav-links a.active {
+        color: var(--text);
+        background: var(--surface2);
+      }
+      .nav-links a.active {
+        color: var(--accent);
+      }
+      .btn-login {
+        background: var(--surface2);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 6px 16px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        font-family: "Outfit", sans-serif;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .btn-login:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      main {
+        padding-top: 56px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .page-header {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .page-header-inner {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      .page-title {
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+      }
+      .page-title span {
+        color: var(--accent);
+      }
+      .breadcrumb {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.7rem;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .breadcrumb a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      .breadcrumb a:hover {
+        color: var(--accent);
+      }
+
+      .state-selector-wrap {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 1rem 2rem;
+      }
+      .state-selector-inner {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .selector-label {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.7rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        white-space: nowrap;
+      }
+      .state-select {
+        background: var(--surface2);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-family: "Outfit", sans-serif;
+        font-size: 0.85rem;
+        cursor: pointer;
+        outline: none;
+        flex: 1;
+        max-width: 280px;
+      }
+      .state-select:focus {
+        border-color: var(--accent);
+      }
+      .state-pills {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        flex: 1;
+      }
+      .pill {
+        padding: 5px 13px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        cursor: pointer;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+      .pill:hover,
+      .pill.active {
+        background: rgba(0, 229, 160, 0.1);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1.25rem;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both;
+      }
+      .card:hover {
+        border-color: var(--border2);
+      }
+      .card-label {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+        margin-bottom: 0.75rem;
+      }
+      .card-accent-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* SUMMARY STATS — now 5 cards */
+      .summ-cards {
+        grid-column: 1/-1;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1rem;
+      }
+      .summ-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.2rem 1.4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .summ-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        margin-bottom: 6px;
+      }
+      .summ-icon.a {
+        background: rgba(0, 229, 160, 0.1);
+        color: var(--accent);
+      }
+      .summ-icon.b {
+        background: rgba(0, 180, 216, 0.1);
+        color: var(--accent2);
+      }
+      .summ-icon.c {
+        background: rgba(244, 200, 66, 0.1);
+        color: var(--gold);
+      }
+      .summ-icon.d {
+        background: rgba(255, 75, 92, 0.1);
+        color: var(--red);
+      }
+      .summ-icon.e {
+        background: rgba(255, 107, 0, 0.1);
+        color: var(--adc);
+      }
+      .summ-num {
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.8rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+      .summ-num.a {
+        color: var(--accent);
+      }
+      .summ-num.b {
+        color: var(--accent2);
+      }
+      .summ-num.c {
+        color: var(--gold);
+      }
+      .summ-num.d {
+        color: var(--red);
+      }
+      .summ-num.e {
+        color: var(--adc);
+      }
+      .summ-lbl {
+        font-size: 0.73rem;
+        color: var(--muted);
+        margin-top: 2px;
+        line-height: 1.3;
+      }
+
+      /* WINNER CARD */
+      .winner-card {
+        grid-column: 1/-1;
+      }
+      .winner-inner {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+      }
+      .winner-party {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .winner-badge {
+        width: 64px;
+        height: 64px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .winner-label {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.65rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      .winner-name {
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.8rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        color: var(--adc);
+      }
+      .winner-sub {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .winner-stats {
+        display: flex;
+        gap: 2.5rem;
+        margin-left: auto;
+        flex-wrap: wrap;
+      }
+      .wstat {
+        text-align: center;
+      }
+      .wstat-num {
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+      }
+      .wstat-label {
+        font-size: 0.7rem;
+        color: var(--muted);
+        margin-top: 2px;
+        font-family: "IBM Plex Mono", monospace;
+      }
+      .lead-margin {
+        background: rgba(0, 229, 160, 0.08);
+        border: 1px solid rgba(0, 229, 160, 0.2);
+        border-radius: 8px;
+        padding: 10px 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .bar-card {
+        grid-column: 1/3;
+      }
+      .pie-card {
+        grid-column: 3/4;
+      }
+      .pie-wrap {
+        position: relative;
+        height: 220px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 1rem 0 0.5rem;
+      }
+      .pie-center {
+        position: absolute;
+        text-align: center;
+        pointer-events: none;
+      }
+      .pie-center-num {
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--adc);
+      }
+      .pie-center-lbl {
+        font-size: 0.6rem;
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+        text-transform: uppercase;
+      }
+      .pie-legend {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+      .pie-leg-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.78rem;
+      }
+      .pie-leg-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .pie-leg-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+      }
+      .pie-leg-pct {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.72rem;
+        color: var(--muted);
+      }
+
+      .lga-card {
+        grid-column: 1/-1;
+      }
+      .lga-search {
+        width: 100%;
+        background: var(--surface2);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 9px 14px;
+        border-radius: 8px;
+        font-family: "Outfit", sans-serif;
+        font-size: 0.85rem;
+        outline: none;
+        margin-bottom: 1rem;
+      }
+      .lga-search:focus {
+        border-color: var(--accent);
+      }
+      .lga-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .lga-table th {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        text-align: left;
+        padding: 0 0 10px;
+        border-bottom: 1px solid var(--border);
+      }
+      .lga-table th:not(:first-child) {
+        text-align: right;
+      }
+      .lga-table td {
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(26, 46, 58, 0.5);
+        font-size: 0.82rem;
+        vertical-align: middle;
+      }
+      .lga-table td:not(:first-child) {
+        text-align: right;
+      }
+      .lga-table tr:last-child td {
+        border-bottom: none;
+      }
+      .lga-table tr:hover td {
+        background: rgba(0, 229, 160, 0.02);
+      }
+      .lga-name {
+        font-weight: 500;
+      }
+      .mono {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.8rem;
+      }
+      .status-badge {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.62rem;
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+      .s-done {
+        background: rgba(0, 229, 160, 0.1);
+        color: var(--accent);
+      }
+      .s-partial {
+        background: rgba(244, 200, 66, 0.1);
+        color: var(--gold);
+      }
+      .s-pending {
+        background: rgba(90, 138, 122, 0.1);
+        color: var(--muted);
+      }
+      .winner-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.75rem;
+        font-weight: 500;
+      }
+      .wchip-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+      .lga-bar {
+        width: 60px;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 6px;
+      }
+      .lga-bar-fill {
+        height: 100%;
+        border-radius: 2px;
+      }
+
+      .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+      }
+      .pag-info {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.7rem;
+        color: var(--muted);
+      }
+      .pag-btns {
+        display: flex;
+        gap: 6px;
+      }
+      .pag-btn {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 5px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.78rem;
+        transition: all 0.15s;
+      }
+      .pag-btn:hover,
+      .pag-btn.active {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      @media (max-width: 1100px) {
+        .content {
+          grid-template-columns: 1fr 1fr;
+        }
+        .winner-card,
+        .bar-card,
+        .lga-card,
+        .summ-cards {
+          grid-column: 1/-1;
+        }
+        .pie-card {
+          grid-column: 1/2;
+        }
+        .summ-cards {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      @media (max-width: 700px) {
+        .content {
+          grid-template-columns: 1fr;
+          padding: 1rem;
+        }
+        .summ-cards {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .winner-inner {
+          flex-direction: column;
+        }
+        .winner-stats {
+          margin-left: 0;
+        }
+        .nav-links {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="logo">
+        <div class="logo-mark">VR</div>
+        V-<span>Rec</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Dashboard</a>
+        <a href="#" class="active">States</a>
+        <a href="vrec-lga-results.html">LGAs</a>
+        <a href="vrec-charts.html">Charts</a>
+        <a href="vrec-progress.html">Progress</a>
+      </nav>
+      <div style="display: flex; align-items: center; gap: 12px">
+        <div class="live-badge">
+          <div class="live-dot"></div>
+          LIVE
+        </div>
+        <a href="vrec-admin-login.html" class="btn-login">Admin / Agent →</a>
+      </div>
+    </header>
+
+    <main>
+      <div class="page-header">
+        <div class="page-header-inner">
+          <div>
+            <div class="page-title">
+              State Results · <span id="state-title">Lagos State</span>
+            </div>
+            <div class="breadcrumb">
+              <a href="index.html">Dashboard</a> / States /
+              <span id="bread-state">Lagos</span>
+            </div>
+          </div>
+          <div class="live-badge">
+            <div class="live-dot"></div>
+            LIVE
+          </div>
+        </div>
+      </div>
+
+      <div class="state-selector-wrap">
+        <div class="state-selector-inner">
+          <span class="selector-label">Select State:</span>
+          <select
+            class="state-select"
+            id="stateSelect"
+            onchange="loadState(this.value)"
+          ></select>
+          <div class="state-pills" id="quickPills"></div>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- SUMMARY STATS — 5 cards -->
+        <div class="summ-cards">
+          <div class="summ-card">
+            <div class="summ-icon a"><i class="fas fa-map-marker-alt"></i></div>
+            <div class="summ-num a" id="s-pus">--</div>
+            <div class="summ-lbl">Polling Units</div>
+          </div>
+          <div class="summ-card">
+            <div class="summ-icon e"><i class="fas fa-building"></i></div>
+            <div class="summ-num e" id="s-vp">--</div>
+            <div class="summ-lbl">Voting Points</div>
+          </div>
+          <div class="summ-card">
+            <div class="summ-icon b"><i class="fas fa-check-circle"></i></div>
+            <div class="summ-num b" id="s-rep">--</div>
+            <div class="summ-lbl">Units Reported</div>
+          </div>
+          <div class="summ-card">
+            <div class="summ-icon c"><i class="fas fa-vote-yea"></i></div>
+            <div class="summ-num c" id="s-votes">--</div>
+            <div class="summ-lbl">Total Votes Cast</div>
+          </div>
+          <div class="summ-card">
+            <div class="summ-icon d">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="summ-num d" id="s-rej">--</div>
+            <div class="summ-lbl">Rejected Ballots</div>
+          </div>
+        </div>
+
+        <!-- WINNER CARD -->
+        <div class="card winner-card">
+          <div
+            class="card-accent-line"
+            style="background: linear-gradient(90deg, var(--adc), transparent)"
+          ></div>
+          <div class="card-label">
+            <i
+              class="fas fa-crown"
+              style="margin-right: 5px; color: var(--adc)"
+            ></i
+            >Current Leader
+          </div>
+          <div class="winner-inner" id="winner-inner"></div>
+        </div>
+
+        <!-- BAR CHART -->
+        <div class="card bar-card">
+          <div
+            class="card-accent-line"
+            style="
+              background: linear-gradient(90deg, var(--accent2), transparent);
+            "
+          ></div>
+          <div class="card-label">
+            <i
+              class="fas fa-chart-bar"
+              style="margin-right: 5px; color: var(--accent2)"
+            ></i
+            >Votes by Party
+          </div>
+          <canvas id="barChart" height="100"></canvas>
+        </div>
+
+        <!-- PIE CHART -->
+        <div class="card pie-card">
+          <div
+            class="card-accent-line"
+            style="background: linear-gradient(90deg, var(--adc), transparent)"
+          ></div>
+          <div class="card-label">
+            <i
+              class="fas fa-chart-pie"
+              style="margin-right: 5px; color: var(--adc)"
+            ></i
+            >Share Breakdown
+          </div>
+          <div class="pie-wrap">
+            <canvas id="pieChart" width="200" height="200"></canvas>
+            <div class="pie-center">
+              <div class="pie-center-num" id="pie-winner-pct">--</div>
+              <div class="pie-center-lbl">ADC Lead</div>
+            </div>
+          </div>
+          <div class="pie-legend" id="pie-legend"></div>
+        </div>
+
+        <!-- LGA TABLE -->
+        <div class="card lga-card">
+          <div
+            class="card-accent-line"
+            style="
+              background: linear-gradient(90deg, var(--accent), transparent);
+            "
+          ></div>
+          <div class="card-label">
+            <i
+              class="fas fa-table"
+              style="margin-right: 5px; color: var(--accent)"
+            ></i
+            >LGA Breakdown
+          </div>
+          <input
+            class="lga-search"
+            type="text"
+            placeholder="Search LGA…"
+            oninput="filterLGA(this.value)"
+          />
+          <table class="lga-table">
+            <thead>
+              <tr>
+                <th>LGA</th>
+                <th>Polling Units</th>
+                <th>Voting Points</th>
+                <th>Reported</th>
+                <th>Total Votes</th>
+                <th>Leader</th>
+                <th>Votes</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="lga-tbody"></tbody>
+          </table>
+          <div class="pagination">
+            <span class="pag-info" id="pag-info">Showing 1–10 of 20</span>
+            <div class="pag-btns">
+              <button class="pag-btn" onclick="changePage(-1)">← Prev</button>
+              <button class="pag-btn active" id="pag-cur">1</button>
+              <button class="pag-btn" onclick="changePage(1)">Next →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer
+      style="
+        text-align: center;
+        padding: 2rem;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-family: &quot;IBM Plex Mono&quot;, monospace;
+        position: relative;
+        z-index: 1;
+      "
+    >
+      V-Rec · State Results · MVP Demo · Simulated Data
+    </footer>
+
+    <script>
+      const STATES = [
+        "Abia",
+        "Adamawa",
+        "Akwa Ibom",
+        "Anambra",
+        "Bauchi",
+        "Bayelsa",
+        "Benue",
+        "Borno",
+        "Cross River",
+        "Delta",
+        "Ebonyi",
+        "Edo",
+        "Ekiti",
+        "Enugu",
+        "Gombe",
+        "Imo",
+        "Jigawa",
+        "Kaduna",
+        "Kano",
+        "Katsina",
+        "Kebbi",
+        "Kogi",
+        "Kwara",
+        "Lagos",
+        "Nasarawa",
+        "Niger",
+        "Ogun",
+        "Ondo",
+        "Osun",
+        "Oyo",
+        "Plateau",
+        "Rivers",
+        "Sokoto",
+        "Taraba",
+        "Yobe",
+        "Zamfara",
+        "FCT",
+      ];
+      // ADC always index 0 and always wins
+      const PARTIES = [
+        { name: "ADC", color: "#FF6B00" },
+        { name: "APC", color: "#0080FF" },
+        { name: "PDP", color: "#E80020" },
+        { name: "LP", color: "#228B22" },
+        { name: "Others", color: "#94A3B8" },
+      ];
+      const QUICK = ["Lagos", "Kano", "Rivers", "FCT", "Oyo", "Delta"];
+      let barChartObj = null,
+        pieChartObj = null;
+      let currentLGAs = [],
+        filteredLGAs = [],
+        page = 1;
+      const PAGE_SIZE = 10;
+
+      function rnd(a, b) {
+        return Math.floor(Math.random() * (b - a + 1)) + a;
+      }
+      function fmtN(n) {
+        return n.toLocaleString();
+      }
+
+      function genStateData(state) {
+        const lgas = rnd(8, 21);
+        const lgaList = [];
+        for (let i = 1; i <= lgas; i++) {
+          const pu = rnd(120, 600);
+          const vp = Math.round((pu * rnd(25, 35)) / 10); // 2.5–3.5 voting points per PU
+          const rep = rnd(Math.floor(pu * 0.4), pu);
+          const tv = rep * rnd(200, 450);
+          const rejected = Math.floor(tv * 0.012);
+          // ADC always leads with ~37-44% share
+          const votes = [];
+          let rem = tv - rejected;
+          const adcPct = 0.37 + Math.random() * 0.07;
+          const adcV = Math.floor(rem * adcPct);
+          votes.push(adcV);
+          rem -= adcV;
+          for (let j = 1; j < 5; j++) {
+            if (j === 4) {
+              votes.push(Math.max(0, rem));
+            } else {
+              const v = Math.floor(rem * (0.05 + Math.random() * 0.22));
+              votes.push(v);
+              rem -= v;
+            }
+          }
+          lgaList.push({
+            name: `${state} LGA ${i}`,
+            pu,
+            vp,
+            rep,
+            tv,
+            rejected,
+            votes,
+            winIdx: 0,
+            status: rep === pu ? "done" : rep > 0 ? "partial" : "pending",
+          });
+        }
+        return lgaList;
+      }
+
+      function buildSelect() {
+        const sel = document.getElementById("stateSelect");
+        sel.innerHTML = STATES.map(
+          (s) => `<option value="${s}">${s}</option>`,
+        ).join("");
+        sel.value = "Lagos";
+      }
+
+      function buildPills() {
+        const el = document.getElementById("quickPills");
+        el.innerHTML = QUICK.map(
+          (s) =>
+            `<div class="pill ${s === "Lagos" ? "active" : ""}" onclick="selectPill(this,'${s}')">${s}</div>`,
+        ).join("");
+      }
+
+      function selectPill(el, state) {
+        document
+          .querySelectorAll(".pill")
+          .forEach((p) => p.classList.remove("active"));
+        el.classList.add("active");
+        document.getElementById("stateSelect").value = state;
+        loadState(state);
+      }
+
+      function loadState(state) {
+        document.getElementById("state-title").textContent = state + " State";
+        document.getElementById("bread-state").textContent = state;
+        document.querySelectorAll(".pill").forEach((p) => {
+          p.classList.toggle("active", p.textContent === state);
+        });
+        document.getElementById("stateSelect").value = state;
+
+        const lgas = genStateData(state);
+        currentLGAs = lgas;
+        filteredLGAs = [...lgas];
+        page = 1;
+
+        const totalPU = lgas.reduce((a, l) => a + l.pu, 0);
+        const totalVP = lgas.reduce((a, l) => a + l.vp, 0);
+        const totalRep = lgas.reduce((a, l) => a + l.rep, 0);
+        const totalVotes = lgas.reduce((a, l) => a + l.tv, 0);
+        const totalRej = lgas.reduce((a, l) => a + l.rejected, 0);
+        document.getElementById("s-pus").textContent = fmtN(totalPU);
+        document.getElementById("s-vp").textContent = fmtN(totalVP);
+        document.getElementById("s-rep").textContent = fmtN(totalRep);
+        document.getElementById("s-votes").textContent = fmtN(totalVotes);
+        document.getElementById("s-rej").textContent = fmtN(totalRej);
+
+        const partyTotals = PARTIES.map((_, i) =>
+          lgas.reduce((a, l) => a + l.votes[i], 0),
+        );
+        const totalCast = partyTotals.reduce((a, b) => a + b, 0);
+        // ADC is always winner (index 0)
+        const w = PARTIES[0];
+        const adcPct = ((partyTotals[0] / totalCast) * 100).toFixed(1);
+        const margin = partyTotals[0] - partyTotals[1];
+
+        document.getElementById("winner-inner").innerHTML = `
+    <div class="winner-party">
+      <div class="winner-badge" style="background:${w.color}"><i class="fas fa-crown"></i></div>
+      <div class="winner-info">
+        <div class="winner-label"><i class="fas fa-signal" style="margin-right:4px;font-size:0.55rem;"></i>Leading Party</div>
+        <div class="winner-name">${w.name}</div>
+        <div class="winner-sub">African Democratic Congress · ${state} State · ${adcPct}% of votes counted</div>
+      </div>
+    </div>
+    <div class="winner-stats">
+      ${PARTIES.map(
+        (p, i) => `
+        <div class="wstat">
+          <div class="wstat-num" style="color:${p.color}">${fmtN(partyTotals[i])}</div>
+          <div class="wstat-label">${p.name}</div>
+        </div>`,
+      ).join("")}
+      <div class="lead-margin">
+        <div class="wstat-num" style="color:var(--accent)">${fmtN(margin)}</div>
+        <div class="wstat-label">Lead Margin</div>
+      </div>
+    </div>`;
+
+        document.getElementById("pie-winner-pct").textContent = adcPct + "%";
+
+        if (barChartObj) {
+          barChartObj.destroy();
+        }
+        const bctx = document.getElementById("barChart").getContext("2d");
+        barChartObj = new Chart(bctx, {
+          type: "bar",
+          data: {
+            labels: PARTIES.map((p) => p.name),
+            datasets: [
+              {
+                data: partyTotals,
+                backgroundColor: PARTIES.map((p) => p.color),
+                borderRadius: 6,
+                borderSkipped: false,
+              },
+            ],
+          },
+          options: {
+            plugins: { legend: { display: false } },
+            scales: {
+              x: {
+                grid: { color: "rgba(26,46,58,0.5)" },
+                ticks: {
+                  color: "#5A8A7A",
+                  font: { family: "IBM Plex Mono", size: 11 },
+                },
+              },
+              y: {
+                grid: { color: "rgba(26,46,58,0.5)" },
+                ticks: {
+                  color: "#5A8A7A",
+                  font: { family: "IBM Plex Mono", size: 10 },
+                  callback: (v) =>
+                    v >= 1e6
+                      ? (v / 1e6).toFixed(1) + "M"
+                      : v >= 1e3
+                        ? (v / 1e3).toFixed(0) + "K"
+                        : v,
+                },
+              },
+            },
+            animation: { duration: 800 },
+          },
+        });
+
+        if (pieChartObj) {
+          pieChartObj.destroy();
+        }
+        const pctx = document.getElementById("pieChart").getContext("2d");
+        pieChartObj = new Chart(pctx, {
+          type: "doughnut",
+          data: {
+            labels: PARTIES.map((p) => p.name),
+            datasets: [
+              {
+                data: partyTotals,
+                backgroundColor: PARTIES.map((p) => p.color),
+                borderWidth: 2,
+                borderColor: "#0C1419",
+              },
+            ],
+          },
+          options: {
+            cutout: "65%",
+            plugins: { legend: { display: false } },
+            animation: { duration: 900 },
+          },
+        });
+        document.getElementById("pie-legend").innerHTML = PARTIES.map(
+          (p, i) => `
+    <div class="pie-leg-item">
+      <div class="pie-leg-left"><div class="pie-leg-dot" style="background:${p.color}"></div><span style="font-size:0.78rem">${p.name}</span></div>
+      <span class="pie-leg-pct">${((partyTotals[i] / totalCast) * 100).toFixed(1)}%</span>
+    </div>`,
+        ).join("");
+
+        renderLGATable();
+      }
+
+      function renderLGATable() {
+        const start = (page - 1) * PAGE_SIZE;
+        const slice = filteredLGAs.slice(start, start + PAGE_SIZE);
+        const tbody = document.getElementById("lga-tbody");
+        tbody.innerHTML = slice
+          .map((l) => {
+            const w = PARTIES[0]; // ADC always leads
+            const repPct = Math.round((l.rep / l.pu) * 100);
+            const sc = {
+              done: "s-done",
+              partial: "s-partial",
+              pending: "s-pending",
+            }[l.status];
+            const sl = {
+              done: "Reported",
+              partial: "Partial",
+              pending: "Pending",
+            }[l.status];
+            return `<tr>
+      <td class="lga-name">${l.name}</td>
+      <td class="mono">${fmtN(l.pu)}</td>
+      <td class="mono">${fmtN(l.vp)}</td>
+      <td>
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
+          <div class="lga-bar"><div class="lga-bar-fill" style="width:${repPct}%;background:var(--accent)"></div></div>
+          <span class="mono">${repPct}%</span>
+        </div>
+      </td>
+      <td class="mono">${fmtN(l.tv)}</td>
+      <td><div class="winner-chip"><div class="wchip-dot" style="background:${w.color}"></div>${w.name}</div></td>
+      <td class="mono">${fmtN(l.votes[0])}</td>
+      <td><span class="status-badge ${sc}">${sl}</span></td>
+    </tr>`;
+          })
+          .join("");
+        document.getElementById("pag-info").textContent =
+          `Showing ${start + 1}–${Math.min(start + PAGE_SIZE, filteredLGAs.length)} of ${filteredLGAs.length}`;
+        document.getElementById("pag-cur").textContent = page;
+      }
+
+      function filterLGA(q) {
+        filteredLGAs = currentLGAs.filter((l) =>
+          l.name.toLowerCase().includes(q.toLowerCase()),
+        );
+        page = 1;
+        renderLGATable();
+      }
+      function changePage(d) {
+        const max = Math.ceil(filteredLGAs.length / PAGE_SIZE);
+        page = Math.max(1, Math.min(page + d, max));
+        renderLGATable();
+      }
+
+      buildSelect();
+      buildPills();
+      loadState("Lagos");
+    </script>
+  </body>
+</html>

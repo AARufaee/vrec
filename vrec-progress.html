@@ -1,0 +1,1322 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>V-Rec · Reporting Progress</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --bg: #050a0e;
+        --surface: #0c1419;
+        --surface2: #111d25;
+        --border: #1a2e3a;
+        --border2: #1f3545;
+        --text: #e8f4f0;
+        --muted: #5a8a7a;
+        --accent: #00e5a0;
+        --accent2: #00b4d8;
+        --gold: #f4c842;
+        --red: #ff4b5c;
+        --adc: #ff6b00;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Outfit", sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          radial-gradient(
+            ellipse 80% 50% at 20% -10%,
+            rgba(255, 107, 0, 0.05) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 60% 40% at 80% 110%,
+            rgba(0, 180, 216, 0.05) 0%,
+            transparent 60%
+          );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2rem;
+        height: 56px;
+        background: rgba(5, 10, 14, 0.92);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border);
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+         font-family: "Open Sans", sans-serif;
+        font-weight: 800;
+        font-size: 1.15rem;
+        letter-spacing: -0.02em;
+      }
+      .logo-mark {
+        width: 28px;
+        height: 28px;
+        background: var(--accent);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #050a0e;
+      }
+      .logo span {
+        color: var(--accent);
+      }
+      .live-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 75, 92, 0.12);
+        border: 1px solid rgba(255, 75, 92, 0.3);
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.68rem;
+        color: var(--red);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .live-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--red);
+        border-radius: 50%;
+        animation: pulse 1.4s ease infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(0.7);
+        }
+      }
+      .nav-links {
+        display: flex;
+      }
+      .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.82rem;
+        padding: 6px 14px;
+        border-radius: 6px;
+        transition: all 0.2s;
+        font-weight: 500;
+      }
+      .nav-links a:hover,
+      .nav-links a.active {
+        color: var(--text);
+        background: var(--surface2);
+      }
+      .nav-links a.active {
+        color: var(--accent);
+      }
+      .btn-login {
+        background: var(--surface2);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 6px 16px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        font-family: "Outfit", sans-serif;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .btn-login:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      main {
+        padding-top: 56px;
+        position: relative;
+        z-index: 1;
+      }
+      .page-header {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .page-header-inner {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      .page-title {
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+      }
+      .page-title span {
+        color: var(--accent);
+      }
+      .breadcrumb {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.7rem;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .breadcrumb a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+
+      /* NATIONAL PROGRESS HERO */
+      .hero-prog {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 2rem;
+      }
+      .hero-inner {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .big-progress {
+        margin-bottom: 1.5rem;
+      }
+      .big-bar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .big-pct {
+         font-family: "Open Sans", sans-serif;
+        font-size: 3.5rem;
+        font-weight: 800;
+        letter-spacing: -0.06em;
+        color: var(--accent);
+        line-height: 1;
+      }
+      .big-label {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.75rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .big-sub {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.75rem;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .big-bar {
+        height: 12px;
+        background: var(--border);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .big-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        border-radius: 6px;
+        transition: width 2s ease;
+      }
+
+      /* HERO STATS — 7 items including Voting Points */
+      .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+      .hs {
+        text-align: center;
+        padding: 12px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+      .hs-icon {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        margin-bottom: 2px;
+      }
+      .hs-icon.a {
+        background: rgba(0, 229, 160, 0.1);
+        color: var(--accent);
+      }
+      .hs-icon.b {
+        background: rgba(0, 180, 216, 0.1);
+        color: var(--accent2);
+      }
+      .hs-icon.c {
+        background: rgba(244, 200, 66, 0.1);
+        color: var(--gold);
+      }
+      .hs-icon.d {
+        background: rgba(255, 75, 92, 0.1);
+        color: var(--red);
+      }
+      .hs-icon.e {
+        background: rgba(232, 244, 240, 0.06);
+        color: var(--text);
+      }
+      .hs-icon.f {
+        background: rgba(90, 138, 122, 0.1);
+        color: var(--muted);
+      }
+      .hs-icon.o {
+        background: rgba(255, 107, 0, 0.1);
+        color: var(--adc);
+      }
+      .hs-num {
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.2rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+      .hs-num.a {
+        color: var(--accent);
+      }
+      .hs-num.b {
+        color: var(--accent2);
+      }
+      .hs-num.c {
+        color: var(--gold);
+      }
+      .hs-num.d {
+        color: var(--red);
+      }
+      .hs-num.e {
+        color: var(--text);
+      }
+      .hs-num.f {
+        color: var(--muted);
+      }
+      .hs-num.o {
+        color: var(--adc);
+      }
+      .hs-lbl {
+        font-size: 0.65rem;
+        color: var(--muted);
+        font-family: "IBM Plex Mono", monospace;
+        line-height: 1.2;
+        text-align: center;
+      }
+
+      .content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1.25rem;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp 0.4s ease both;
+      }
+      .card:hover {
+        border-color: var(--border2);
+      }
+      .card-label {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .card-label i {
+        font-size: 0.7rem;
+      }
+      .card-accent-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .full-width {
+        grid-column: 1/-1;
+      }
+      .two-col {
+        grid-column: 1/3;
+      }
+
+      /* ZONE PROGRESS */
+      .zone-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .zone-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+      .zone-name {
+        font-weight: 500;
+        font-size: 0.88rem;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .zone-name i {
+        font-size: 0.7rem;
+        color: var(--muted);
+      }
+      .zone-stats {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .zone-pct {
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--accent);
+      }
+      .zone-count {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.68rem;
+        color: var(--muted);
+      }
+      .zone-bar {
+        height: 8px;
+        background: var(--border);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .zone-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 1.8s ease;
+      }
+
+      /* STATE TABLE */
+      .filter-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+      }
+      .filter-btn {
+        padding: 5px 13px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        cursor: pointer;
+        transition: all 0.15s;
+        font-family: "Outfit", sans-serif;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .filter-btn i {
+        font-size: 0.65rem;
+      }
+      .filter-btn:hover,
+      .filter-btn.active {
+        background: rgba(0, 229, 160, 0.1);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .state-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .state-table th {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        text-align: left;
+        padding: 0 0 10px;
+        border-bottom: 1px solid var(--border);
+      }
+      .state-table th:not(:first-child) {
+        text-align: right;
+      }
+      .state-table td {
+        padding: 9px 0;
+        border-bottom: 1px solid rgba(26, 46, 58, 0.5);
+        font-size: 0.82rem;
+      }
+      .state-table td:not(:first-child) {
+        text-align: right;
+      }
+      .state-table tr:last-child td {
+        border-bottom: none;
+      }
+      .state-table tr:hover td {
+        background: rgba(0, 229, 160, 0.02);
+      }
+      .mono {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.8rem;
+      }
+      .prog-cell {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+      .mini-bar {
+        width: 70px;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .mini-fill {
+        height: 100%;
+        border-radius: 2px;
+      }
+      .tag {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.62rem;
+        padding: 2px 7px;
+        border-radius: 4px;
+      }
+      .t-done {
+        background: rgba(0, 229, 160, 0.1);
+        color: var(--accent);
+      }
+      .t-part {
+        background: rgba(244, 200, 66, 0.1);
+        color: var(--gold);
+      }
+      .t-pend {
+        background: rgba(90, 138, 122, 0.1);
+        color: var(--muted);
+      }
+      .t-crit {
+        background: rgba(255, 75, 92, 0.1);
+        color: var(--red);
+      }
+      .sort-btn {
+        cursor: pointer;
+        user-select: none;
+      }
+      .sort-btn:hover {
+        color: var(--accent);
+      }
+
+      /* ETA */
+      .eta-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .eta-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+      .eta-state {
+        font-weight: 500;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .eta-state i {
+        font-size: 0.65rem;
+        color: var(--muted);
+      }
+      .eta-time {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.78rem;
+        color: var(--gold);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .eta-time i {
+        font-size: 0.65rem;
+      }
+      .eta-pct {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.72rem;
+        color: var(--muted);
+      }
+
+      /* MILESTONE TIMELINE */
+      .timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        margin-top: 0.5rem;
+      }
+      .tl-item {
+        display: flex;
+        gap: 16px;
+        padding-bottom: 16px;
+        position: relative;
+      }
+      .tl-item:last-child {
+        padding-bottom: 0;
+      }
+      .tl-left {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .tl-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.6rem;
+        flex-shrink: 0;
+      }
+      .tl-line {
+        flex: 1;
+        width: 1px;
+        background: var(--border);
+        margin: 4px 0;
+      }
+      .tl-item:last-child .tl-line {
+        display: none;
+      }
+      .tl-time {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.65rem;
+        color: var(--muted);
+        white-space: nowrap;
+        min-width: 40px;
+        padding-top: 4px;
+      }
+      .tl-title {
+        font-size: 0.82rem;
+        font-weight: 500;
+      }
+      .tl-sub {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.65rem;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+
+      @media (max-width: 1100px) {
+        .content {
+          grid-template-columns: 1fr 1fr;
+        }
+        .two-col {
+          grid-column: 1/-1;
+        }
+        .hero-stats {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+      @media (max-width: 700px) {
+        .content {
+          grid-template-columns: 1fr;
+          padding: 1rem;
+        }
+        .hero-stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .nav-links {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="logo">
+        <div class="logo-mark">VR</div>
+        V-<span>Rec</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Dashboard</a>
+        <a href="vrec-state-results.html">States</a>
+        <a href="vrec-lga-results.html">LGAs</a>
+        <a href="vrec-charts.html">Charts</a>
+        <a href="#" class="active">Progress</a>
+      </nav>
+      <div style="display: flex; align-items: center; gap: 12px">
+        <div class="live-badge">
+          <div class="live-dot"></div>
+          LIVE
+        </div>
+        <a href="vrec-admin-login.html" class="btn-login">Admin / Agent →</a>
+      </div>
+    </header>
+
+    <main>
+      <div class="page-header">
+        <div class="page-header-inner">
+          <div>
+            <div class="page-title">Reporting <span>Progress</span></div>
+            <div class="breadcrumb">
+              <a href="index.html">Dashboard</a> / Progress
+            </div>
+          </div>
+          <div class="live-badge">
+            <div class="live-dot"></div>
+            LIVE
+          </div>
+        </div>
+      </div>
+
+      <!-- NATIONAL HERO -->
+      <div class="hero-prog">
+        <div class="hero-inner">
+          <div class="big-progress">
+            <div class="big-bar-header">
+              <div>
+                <div class="big-label">
+                  <i class="fas fa-chart-line"></i>National Reporting Completion
+                </div>
+                <div class="big-pct">68.4%</div>
+              </div>
+              <div class="big-sub">
+                <i class="fas fa-map-marker-alt"></i>82,659 of 120,847 polling
+                units reported
+              </div>
+            </div>
+            <div class="big-bar">
+              <div class="big-fill" id="big-fill" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- 7 hero stats including Voting Points -->
+          <div class="hero-stats">
+            <div class="hs">
+              <div class="hs-icon e"><i class="fas fa-map-marker-alt"></i></div>
+              <div class="hs-num e">120,847</div>
+              <div class="hs-lbl">Total PUs</div>
+            </div>
+            <div class="hs">
+              <div class="hs-icon o"><i class="fas fa-building"></i></div>
+              <div class="hs-num o">342,190</div>
+              <div class="hs-lbl">Voting Points</div>
+            </div>
+            <div class="hs">
+              <div class="hs-icon a"><i class="fas fa-check-circle"></i></div>
+              <div class="hs-num a">82,659</div>
+              <div class="hs-lbl">Reported</div>
+            </div>
+            <div class="hs">
+              <div class="hs-icon b"><i class="fas fa-hourglass-half"></i></div>
+              <div class="hs-num b">38,188</div>
+              <div class="hs-lbl">Pending</div>
+            </div>
+            <div class="hs">
+              <div class="hs-icon c"><i class="fas fa-flag-checkered"></i></div>
+              <div class="hs-num c">7</div>
+              <div class="hs-lbl">States Full</div>
+            </div>
+            <div class="hs">
+              <div class="hs-icon d">
+                <i class="fas fa-exclamation-triangle"></i>
+              </div>
+              <div class="hs-num d">412</div>
+              <div class="hs-lbl">Flagged</div>
+            </div>
+            <div class="hs">
+              <div class="hs-icon f"><i class="fas fa-clock"></i></div>
+              <div class="hs-num f">~2h 18m</div>
+              <div class="hs-lbl">Est. Completion</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- ZONE PROGRESS -->
+        <div class="card two-col">
+          <div
+            class="card-accent-line"
+            style="
+              background: linear-gradient(90deg, var(--accent), transparent);
+            "
+          ></div>
+          <div class="card-label">
+            <i class="fas fa-globe-africa"></i>Reporting Progress · By
+            Geopolitical Zone
+          </div>
+          <div class="zone-list" id="zone-list"></div>
+        </div>
+
+        <!-- ETA -->
+        <div class="card">
+          <div
+            class="card-accent-line"
+            style="background: linear-gradient(90deg, var(--gold), transparent)"
+          ></div>
+          <div class="card-label">
+            <i class="fas fa-clock"></i>Estimated Completion · Slowest States
+          </div>
+          <div class="eta-list" id="eta-list"></div>
+        </div>
+
+        <!-- STATE BAR CHART -->
+        <div class="card two-col">
+          <div
+            class="card-accent-line"
+            style="
+              background: linear-gradient(90deg, var(--accent2), transparent);
+            "
+          ></div>
+          <div class="card-label">
+            <i class="fas fa-chart-bar"></i>Reporting Progress · All 37 States
+          </div>
+          <canvas id="stateProgBar" height="90"></canvas>
+        </div>
+
+        <!-- DOUGHNUT -->
+        <div class="card">
+          <div
+            class="card-accent-line"
+            style="background: linear-gradient(90deg, var(--gold), transparent)"
+          ></div>
+          <div class="card-label">
+            <i class="fas fa-chart-pie"></i>Submission Status
+          </div>
+          <canvas id="statusDoughnut" height="200"></canvas>
+        </div>
+
+        <!-- MILESTONE TIMELINE -->
+        <div class="card">
+          <div
+            class="card-accent-line"
+            style="
+              background: linear-gradient(90deg, var(--accent), transparent);
+            "
+          ></div>
+          <div class="card-label">
+            <i class="fas fa-list-check"></i>Collation Milestones
+          </div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+
+        <!-- STATE TABLE -->
+        <div class="card full-width">
+          <div
+            class="card-accent-line"
+            style="
+              background: linear-gradient(90deg, var(--accent), transparent);
+            "
+          ></div>
+          <div class="card-label">
+            <i class="fas fa-table"></i>All States · Progress Tracker
+          </div>
+          <div class="filter-row">
+            <button
+              class="filter-btn active"
+              onclick="filterStates('all', this)"
+            >
+              <i class="fas fa-list"></i>All (37)
+            </button>
+            <button class="filter-btn" onclick="filterStates('done', this)">
+              <i class="fas fa-circle-check"></i>Completed
+            </button>
+            <button class="filter-btn" onclick="filterStates('partial', this)">
+              <i class="fas fa-spinner"></i>In Progress
+            </button>
+            <button class="filter-btn" onclick="filterStates('critical', this)">
+              <i class="fas fa-triangle-exclamation"></i>Critical (&lt;30%)
+            </button>
+          </div>
+          <table class="state-table">
+            <thead>
+              <tr>
+                <th class="sort-btn" onclick="sortTable('name')">
+                  State <i class="fas fa-sort" style="font-size: 0.5rem"></i>
+                </th>
+                <th class="sort-btn" onclick="sortTable('pus')">
+                  Total PUs
+                  <i class="fas fa-sort" style="font-size: 0.5rem"></i>
+                </th>
+                <th>Voting Points</th>
+                <th class="sort-btn" onclick="sortTable('rep')">
+                  Reported <i class="fas fa-sort" style="font-size: 0.5rem"></i>
+                </th>
+                <th class="sort-btn" onclick="sortTable('pct')">
+                  Progress <i class="fas fa-sort" style="font-size: 0.5rem"></i>
+                </th>
+                <th>Flagged</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="state-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <footer
+      style="
+        text-align: center;
+        padding: 2rem;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-family: &quot;IBM Plex Mono&quot;, monospace;
+        position: relative;
+        z-index: 1;
+      "
+    >
+      V-Rec · Reporting Progress · MVP Demo · Simulated Data
+    </footer>
+
+    <script>
+      const STATES_ALL = [
+        "Abia",
+        "Adamawa",
+        "Akwa Ibom",
+        "Anambra",
+        "Bauchi",
+        "Bayelsa",
+        "Benue",
+        "Borno",
+        "Cross River",
+        "Delta",
+        "Ebonyi",
+        "Edo",
+        "Ekiti",
+        "Enugu",
+        "Gombe",
+        "Imo",
+        "Jigawa",
+        "Kaduna",
+        "Kano",
+        "Katsina",
+        "Kebbi",
+        "Kogi",
+        "Kwara",
+        "Lagos",
+        "Nasarawa",
+        "Niger",
+        "Ogun",
+        "Ondo",
+        "Osun",
+        "Oyo",
+        "Plateau",
+        "Rivers",
+        "Sokoto",
+        "Taraba",
+        "Yobe",
+        "Zamfara",
+        "FCT",
+      ];
+      const ZONES = [
+        { name: "North-West", icon: "fa-mosque", color: "#00E5A0", pct: 82 },
+        { name: "North-East", icon: "fa-sun", color: "#00B4D8", pct: 74 },
+        {
+          name: "North-Central",
+          icon: "fa-mountain",
+          color: "#F4C842",
+          pct: 65,
+        },
+        { name: "South-West", icon: "fa-city", color: "#8B5CF6", pct: 71 },
+        { name: "South-East", icon: "fa-leaf", color: "#FF6B00", pct: 58 },
+        { name: "South-South", icon: "fa-water", color: "#E80020", pct: 63 },
+      ];
+
+      const milestones = [
+        {
+          time: "08:01",
+          icon: "fa-flag",
+          iconBg: "rgba(0,229,160,0.12)",
+          iconColor: "#00E5A0",
+          title: "Polls opened nationwide",
+          sub: "120,847 polling units activated",
+          done: true,
+        },
+        {
+          time: "09:30",
+          icon: "fa-upload",
+          iconBg: "rgba(0,229,160,0.12)",
+          iconColor: "#00E5A0",
+          title: "First results submitted",
+          sub: "North-West agents syncing",
+          done: true,
+        },
+        {
+          time: "11:15",
+          icon: "fa-check",
+          iconBg: "rgba(0,229,160,0.12)",
+          iconColor: "#00E5A0",
+          title: "25% national completion",
+          sub: "30,200 units reported",
+          done: true,
+        },
+        {
+          time: "13:00",
+          icon: "fa-check",
+          iconBg: "rgba(0,229,160,0.12)",
+          iconColor: "#00E5A0",
+          title: "50% national completion",
+          sub: "60,400 units reported",
+          done: true,
+        },
+        {
+          time: "14:30",
+          icon: "fa-crown",
+          iconBg: "rgba(244,200,66,0.12)",
+          iconColor: "#F4C842",
+          title: "68.4% · Current milestone",
+          sub: "82,659 units reported",
+          done: true,
+        },
+        {
+          time: "~16:00",
+          icon: "fa-hourglass-half",
+          iconBg: "rgba(90,138,122,0.1)",
+          iconColor: "#5A8A7A",
+          title: "80% estimated",
+          sub: "Projected based on current rate",
+          done: false,
+        },
+        {
+          time: "~18:30",
+          icon: "fa-flag-checkered",
+          iconBg: "rgba(90,138,122,0.1)",
+          iconColor: "#5A8A7A",
+          title: "Full national completion",
+          sub: "Estimated · subject to field delays",
+          done: false,
+        },
+      ];
+
+      function rnd(a, b) {
+        return Math.floor(Math.random() * (b - a + 1)) + a;
+      }
+      function fmtN(n) {
+        return n.toLocaleString();
+      }
+
+      // Big bar animate
+      setTimeout(() => {
+        document.getElementById("big-fill").style.width = "68.4%";
+      }, 200);
+
+      // State data
+      const stateData = STATES_ALL.map((s) => {
+        const pus = rnd(800, 4800);
+        const vp = Math.round((pus * rnd(25, 35)) / 10);
+        const pct = rnd(15, 100);
+        const rep = Math.floor((pus * pct) / 100);
+        const flagged = rnd(0, 12);
+        return {
+          name: s,
+          pus,
+          vp,
+          rep,
+          pct,
+          flagged,
+          status: pct === 100 ? "done" : pct > 30 ? "partial" : "critical",
+        };
+      });
+      let filtered = [...stateData],
+        sortKey = "pct",
+        sortDir = -1;
+
+      // ZONE LIST
+      document.getElementById("zone-list").innerHTML = ZONES.map(
+        (z) => `
+  <div class="zone-item">
+    <div class="zone-header">
+      <span class="zone-name"><i class="fas ${z.icon}"></i>${z.name}</span>
+      <div class="zone-stats">
+        <span class="zone-count">${rnd(2, 8)} states · ${rnd(8000, 22000).toLocaleString()} PUs reported</span>
+        <span class="zone-pct">${z.pct}%</span>
+      </div>
+    </div>
+    <div class="zone-bar"><div class="zone-fill" data-w="${z.pct}" style="width:0%;background:${z.color}"></div></div>
+  </div>`,
+      ).join("");
+      setTimeout(() => {
+        document.querySelectorAll(".zone-fill").forEach((el) => {
+          el.style.width = el.dataset.w + "%";
+        });
+      }, 150);
+
+      // ETA LIST
+      const slowStates = [...stateData]
+        .sort((a, b) => a.pct - b.pct)
+        .slice(0, 6);
+      document.getElementById("eta-list").innerHTML = slowStates
+        .map(
+          (s) => `
+  <div class="eta-item">
+    <div>
+      <div class="eta-state"><i class="fas fa-map-marker-alt"></i>${s.name}</div>
+      <div class="eta-pct">${s.pct}% complete · ${fmtN(s.pus - s.rep)} PUs pending</div>
+    </div>
+    <div class="eta-time"><i class="fas fa-clock"></i>~${rnd(1, 5)}h ${rnd(5, 55)}m</div>
+  </div>`,
+        )
+        .join("");
+
+      // STATE BAR CHART
+      const sorted37 = STATES_ALL.map((s, i) => ({
+        s,
+        v: stateData[i] ? stateData[i].pct : rnd(20, 100),
+      }));
+      new Chart(document.getElementById("stateProgBar").getContext("2d"), {
+        type: "bar",
+        data: {
+          labels: sorted37.map((x) => x.s),
+          datasets: [
+            {
+              data: sorted37.map((x) => x.v),
+              backgroundColor: sorted37.map((x) =>
+                x.v === 100
+                  ? "#00E5A0"
+                  : x.v > 60
+                    ? "#00B4D8"
+                    : x.v > 30
+                      ? "#F4C842"
+                      : "#FF4B5C",
+              ),
+              borderRadius: 4,
+              borderSkipped: false,
+            },
+          ],
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            x: {
+              grid: { color: "rgba(26,46,58,0.5)" },
+              ticks: {
+                color: "#5A8A7A",
+                font: { family: "IBM Plex Mono", size: 7 },
+                maxRotation: 90,
+              },
+            },
+            y: {
+              max: 100,
+              grid: { color: "rgba(26,46,58,0.5)" },
+              ticks: {
+                color: "#5A8A7A",
+                font: { family: "IBM Plex Mono", size: 9 },
+                callback: (v) => v + "%",
+              },
+            },
+          },
+          animation: { duration: 1000 },
+        },
+      });
+
+      // DOUGHNUT
+      const done = stateData.filter((s) => s.status === "done").length;
+      const part = stateData.filter((s) => s.status === "partial").length;
+      const crit = stateData.filter((s) => s.status === "critical").length;
+      new Chart(document.getElementById("statusDoughnut").getContext("2d"), {
+        type: "doughnut",
+        data: {
+          labels: ["Fully Reported", "In Progress", "Critical (<30%)"],
+          datasets: [
+            {
+              data: [done, part, crit],
+              backgroundColor: ["#00E5A0", "#00B4D8", "#FF4B5C"],
+              borderWidth: 2,
+              borderColor: "#0C1419",
+            },
+          ],
+        },
+        options: {
+          cutout: "60%",
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                color: "#5A8A7A",
+                font: { family: "IBM Plex Mono", size: 10 },
+                boxWidth: 10,
+                padding: 10,
+              },
+            },
+          },
+          animation: { duration: 1000 },
+        },
+      });
+
+      // TIMELINE with FA icons
+      document.getElementById("timeline").innerHTML = milestones
+        .map(
+          (m) => `
+  <div class="tl-item">
+    <div class="tl-left">
+      <div class="tl-icon" style="background:${m.iconBg};color:${m.iconColor};${!m.done ? "opacity:0.45" : ""}">
+        <i class="fas ${m.icon}"></i>
+      </div>
+      <div class="tl-line"></div>
+    </div>
+    <div class="tl-time">${m.time}</div>
+    <div class="tl-content">
+      <div class="tl-title" style="color:${m.done ? "var(--text)" : "var(--muted)"}">${m.title}</div>
+      <div class="tl-sub">${m.sub}</div>
+    </div>
+  </div>`,
+        )
+        .join("");
+
+      // STATE TABLE
+      function renderTable() {
+        const tbody = document.getElementById("state-tbody");
+        tbody.innerHTML = filtered
+          .map((s) => {
+            const color =
+              s.pct === 100
+                ? "#00E5A0"
+                : s.pct > 60
+                  ? "#00B4D8"
+                  : s.pct > 30
+                    ? "#F4C842"
+                    : "#FF4B5C";
+            const sc = {
+              done: "t-done",
+              partial: "t-part",
+              critical: "t-crit",
+            }[s.status];
+            const sl = {
+              done: "Complete",
+              partial: "In Progress",
+              critical: "Critical",
+            }[s.status];
+            const flagIcon =
+              s.flagged > 5
+                ? `<i class="fas fa-exclamation-triangle" style="color:var(--red);font-size:0.6rem;margin-right:3px"></i>`
+                : "";
+            return `<tr>
+      <td style="font-weight:500">${s.name}</td>
+      <td class="mono">${fmtN(s.pus)}</td>
+      <td class="mono" style="color:var(--adc)">${fmtN(s.vp)}</td>
+      <td class="mono">${fmtN(s.rep)}</td>
+      <td>
+        <div class="prog-cell">
+          <div class="mini-bar"><div class="mini-fill" style="width:${s.pct}%;background:${color}"></div></div>
+          <span class="mono">${s.pct}%</span>
+        </div>
+      </td>
+      <td class="mono" style="color:${s.flagged > 5 ? "var(--red)" : "var(--muted)"}">${flagIcon}${s.flagged}</td>
+      <td><span class="tag ${sc}">${sl}</span></td>
+    </tr>`;
+          })
+          .join("");
+      }
+
+      function filterStates(f, el) {
+        document
+          .querySelectorAll(".filter-btn")
+          .forEach((b) => b.classList.remove("active"));
+        el.classList.add("active");
+        if (f === "all") filtered = [...stateData];
+        else if (f === "critical")
+          filtered = stateData.filter((s) => s.status === "critical");
+        else filtered = stateData.filter((s) => s.status === f);
+        renderTable();
+      }
+
+      function sortTable(key) {
+        if (sortKey === key) sortDir *= -1;
+        else {
+          sortKey = key;
+          sortDir = -1;
+        }
+        filtered.sort((a, b) => {
+          if (key === "name") return sortDir * a.name.localeCompare(b.name);
+          const map = { rep: "rep", pus: "pus", pct: "pct" };
+          return sortDir * (a[map[key] || "pct"] - b[map[key] || "pct"]);
+        });
+        renderTable();
+      }
+
+      renderTable();
+    </script>
+  </body>
+</html>

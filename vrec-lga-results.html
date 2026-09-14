@@ -1,0 +1,1290 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>V-Rec · LGA Results</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --bg: #050a0e;
+        --surface: #0c1419;
+        --surface2: #111d25;
+        --border: #1a2e3a;
+        --border2: #1f3545;
+        --text: #e8f4f0;
+        --muted: #5a8a7a;
+        --accent: #00e5a0;
+        --accent2: #00b4d8;
+        --gold: #f4c842;
+        --red: #ff4b5c;
+        --adc: #ff6b00;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Outfit", sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          radial-gradient(
+            ellipse 80% 50% at 20% -10%,
+            rgba(255, 107, 0, 0.05) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 60% 40% at 80% 110%,
+            rgba(0, 180, 216, 0.05) 0%,
+            transparent 60%
+          );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2rem;
+        height: 56px;
+        background: rgba(5, 10, 14, 0.92);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border);
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+         font-family: "Open Sans", sans-serif;
+        font-weight: 800;
+        font-size: 1.15rem;
+        letter-spacing: -0.02em;
+      }
+      .logo-mark {
+        width: 28px;
+        height: 28px;
+        background: var(--accent);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #050a0e;
+      }
+      .logo span {
+        color: var(--accent);
+      }
+      .live-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 75, 92, 0.12);
+        border: 1px solid rgba(255, 75, 92, 0.3);
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.68rem;
+        color: var(--red);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .live-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--red);
+        border-radius: 50%;
+        animation: pulse 1.4s ease infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(0.7);
+        }
+      }
+      .nav-links {
+        display: flex;
+        gap: 0;
+      }
+      .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.82rem;
+        padding: 6px 14px;
+        border-radius: 6px;
+        transition: all 0.2s;
+        font-weight: 500;
+      }
+      .nav-links a:hover,
+      .nav-links a.active {
+        color: var(--text);
+        background: var(--surface2);
+      }
+      .nav-links a.active {
+        color: var(--accent);
+      }
+      .btn-login {
+        background: var(--surface2);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 6px 16px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        font-family: "Outfit", sans-serif;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .btn-login:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      main {
+        padding-top: 56px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .page-header {
+        padding: 2rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .page-header-inner {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      .page-title {
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+      }
+      .page-title span {
+        color: var(--accent);
+      }
+      .breadcrumb {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.7rem;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .breadcrumb a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      .breadcrumb a:hover {
+        color: var(--accent);
+      }
+
+      .sel-bar {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 1rem 2rem;
+      }
+      .sel-inner {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .sel-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .sel-lbl {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.7rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        white-space: nowrap;
+      }
+      .sel-drop {
+        background: var(--surface2);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-family: "Outfit", sans-serif;
+        font-size: 0.85rem;
+        cursor: pointer;
+        outline: none;
+        min-width: 180px;
+      }
+      .sel-drop:focus {
+        border-color: var(--accent);
+      }
+      .sel-arrow {
+        color: var(--muted);
+        font-size: 0.8rem;
+        padding: 0 4px;
+      }
+
+      .content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 1.25rem;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .card:hover {
+        border-color: var(--border2);
+      }
+      .card-label {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+        margin-bottom: 0.75rem;
+      }
+      .card-accent-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+      }
+
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      .lga-info-num {
+         font-family: "Open Sans", sans-serif;
+        font-size: 2.2rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        color: var(--accent);
+      }
+      .lga-info-lbl {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(26, 46, 58, 0.5);
+        font-size: 0.82rem;
+      }
+      .info-row:last-child {
+        border-bottom: none;
+      }
+      .info-key {
+        color: var(--muted);
+        font-size: 0.78rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .info-key i {
+        font-size: 0.65rem;
+        width: 12px;
+        text-align: center;
+      }
+      .info-val {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+      .info-val.g {
+        color: var(--accent);
+      }
+      .info-val.y {
+        color: var(--gold);
+      }
+      .info-val.r {
+        color: var(--red);
+      }
+      .info-val.o {
+        color: var(--adc);
+      }
+
+      .party-result-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 0.5rem;
+      }
+      .pr-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+      }
+      .pr-party {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+        font-size: 0.85rem;
+      }
+      .pr-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .pr-votes {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+      .pr-bar {
+        height: 6px;
+        background: var(--border);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .pr-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 1.5s ease;
+      }
+      .pr-pct {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.72rem;
+        color: var(--muted);
+        text-align: right;
+        margin-top: 3px;
+      }
+
+      .main-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      /* STATS ROW — now 5 cards with Voting Points */
+      .pu-stats {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 1rem;
+      }
+      .pu-stat {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1rem 1.2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .pu-stat-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        margin-bottom: 4px;
+      }
+      .pu-stat-icon.a {
+        background: rgba(0, 229, 160, 0.1);
+        color: var(--accent);
+      }
+      .pu-stat-icon.b {
+        background: rgba(0, 180, 216, 0.1);
+        color: var(--accent2);
+      }
+      .pu-stat-icon.c {
+        background: rgba(244, 200, 66, 0.1);
+        color: var(--gold);
+      }
+      .pu-stat-icon.d {
+        background: rgba(255, 75, 92, 0.1);
+        color: var(--red);
+      }
+      .pu-stat-icon.e {
+        background: rgba(255, 107, 0, 0.1);
+        color: var(--adc);
+      }
+      .pu-stat-num {
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.55rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+      .pu-stat-num.a {
+        color: var(--accent);
+      }
+      .pu-stat-num.b {
+        color: var(--accent2);
+      }
+      .pu-stat-num.c {
+        color: var(--gold);
+      }
+      .pu-stat-num.d {
+        color: var(--red);
+      }
+      .pu-stat-num.e {
+        color: var(--adc);
+      }
+      .pu-stat-lbl {
+        font-size: 0.7rem;
+        color: var(--muted);
+        line-height: 1.3;
+      }
+
+      .trend-card {
+        width: 100%;
+      }
+
+      .pu-search {
+        width: 100%;
+        background: var(--surface2);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 9px 14px;
+        border-radius: 8px;
+        font-family: "Outfit", sans-serif;
+        font-size: 0.85rem;
+        outline: none;
+        margin-bottom: 1rem;
+      }
+      .pu-search:focus {
+        border-color: var(--accent);
+      }
+      .pu-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .pu-table th {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        text-align: left;
+        padding: 0 0 10px;
+        border-bottom: 1px solid var(--border);
+      }
+      .pu-table th:not(:first-child) {
+        text-align: right;
+      }
+      .pu-table td {
+        padding: 9px 0;
+        border-bottom: 1px solid rgba(26, 46, 58, 0.5);
+        font-size: 0.82rem;
+      }
+      .pu-table td:not(:first-child) {
+        text-align: right;
+      }
+      .pu-table tr:last-child td {
+        border-bottom: none;
+      }
+      .pu-table tr:hover td {
+        background: rgba(0, 229, 160, 0.02);
+      }
+      .mono {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.8rem;
+      }
+      .status-dot {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        margin-right: 5px;
+      }
+      .s-ok {
+        background: var(--accent);
+      }
+      .s-pend {
+        background: var(--muted);
+      }
+      .s-flag {
+        background: var(--red);
+      }
+      .tag {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.62rem;
+        padding: 2px 7px;
+        border-radius: 4px;
+      }
+      .t-ok {
+        background: rgba(0, 229, 160, 0.1);
+        color: var(--accent);
+      }
+      .t-pend {
+        background: rgba(90, 138, 122, 0.1);
+        color: var(--muted);
+      }
+      .t-flag {
+        background: rgba(255, 75, 92, 0.1);
+        color: var(--red);
+      }
+
+      .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+      }
+      .pag-info {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 0.7rem;
+        color: var(--muted);
+      }
+      .pag-btns {
+        display: flex;
+        gap: 6px;
+      }
+      .pag-btn {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 5px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.78rem;
+        transition: all 0.15s;
+      }
+      .pag-btn:hover,
+      .pag-btn.active {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .card {
+        animation: fadeUp 0.4s ease both;
+      }
+
+      @media (max-width: 1100px) {
+        .content {
+          grid-template-columns: 1fr;
+        }
+        .pu-stats {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      @media (max-width: 600px) {
+        .content {
+          padding: 1rem;
+        }
+        .pu-stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .nav-links {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="logo">
+        <div class="logo-mark">VR</div>
+        V-<span>Rec</span>
+      </div>
+      <nav class="nav-links">
+        <a href="index.html">Dashboard</a>
+        <a href="vrec-state-results.html">States</a>
+        <a href="#" class="active">LGAs</a>
+        <a href="vrec-charts.html">Charts</a>
+        <a href="vrec-progress.html">Progress</a>
+      </nav>
+      <div style="display: flex; align-items: center; gap: 12px">
+        <div class="live-badge">
+          <div class="live-dot"></div>
+          LIVE
+        </div>
+        <a href="vrec-admin-login.html" class="btn-login">Admin / Agent →</a>
+      </div>
+    </header>
+
+    <main>
+      <div class="page-header">
+        <div class="page-header-inner">
+          <div>
+            <div class="page-title">
+              LGA Results · <span id="lga-title">Alimosho LGA</span>
+            </div>
+            <div class="breadcrumb">
+              <a href="index.html">Dashboard</a> /
+              <a href="vrec-state-results.html">States</a> /
+              <span id="bread-state">Lagos</span> /
+              <span id="bread-lga">Alimosho</span>
+            </div>
+          </div>
+          <div class="live-badge">
+            <div class="live-dot"></div>
+            LIVE
+          </div>
+        </div>
+      </div>
+
+      <div class="sel-bar">
+        <div class="sel-inner">
+          <div class="sel-group">
+            <span class="sel-lbl">State:</span>
+            <select
+              class="sel-drop"
+              id="stateSelect"
+              onchange="onStateChange(this.value)"
+            ></select>
+          </div>
+          <span class="sel-arrow">›</span>
+          <div class="sel-group">
+            <span class="sel-lbl">LGA:</span>
+            <select
+              class="sel-drop"
+              id="lgaSelect"
+              onchange="loadLGA(this.value)"
+            ></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+          <div class="card">
+            <div
+              class="card-accent-line"
+              style="
+                background: linear-gradient(90deg, var(--accent), transparent);
+              "
+            ></div>
+            <div class="card-label">
+              <i
+                class="fas fa-chart-line"
+                style="margin-right: 5px; color: var(--accent)"
+              ></i
+              >LGA Overview
+            </div>
+            <div class="lga-info-num" id="si-totalvotes">--</div>
+            <div class="lga-info-lbl">Total Votes Cast</div>
+            <div style="margin-top: 1rem">
+              <div class="info-row">
+                <span class="info-key"
+                  ><i class="fas fa-map-marker-alt"></i>Polling Units</span
+                ><span class="info-val" id="si-pu">--</span>
+              </div>
+              <div class="info-row">
+                <span class="info-key"
+                  ><i class="fas fa-building"></i>Voting Points</span
+                ><span class="info-val o" id="si-vp">--</span>
+              </div>
+              <div class="info-row">
+                <span class="info-key"
+                  ><i class="fas fa-check-circle"></i>Reported</span
+                ><span class="info-val g" id="si-rep">--</span>
+              </div>
+              <div class="info-row">
+                <span class="info-key"
+                  ><i class="fas fa-hourglass-half"></i>Pending</span
+                ><span class="info-val y" id="si-pend">--</span>
+              </div>
+              <div class="info-row">
+                <span class="info-key"
+                  ><i class="fas fa-times-circle"></i>Rejected Ballots</span
+                ><span class="info-val r" id="si-rej">--</span>
+              </div>
+              <div class="info-row">
+                <span class="info-key"
+                  ><i class="fas fa-users"></i>Accredited Voters</span
+                ><span class="info-val" id="si-acc">--</span>
+              </div>
+              <div class="info-row">
+                <span class="info-key"
+                  ><i class="fas fa-percent"></i>Turnout</span
+                ><span class="info-val g" id="si-turnout">--</span>
+              </div>
+              <div class="info-row">
+                <span class="info-key"
+                  ><i class="fas fa-exclamation-triangle"></i>Anomalies
+                  Flagged</span
+                ><span class="info-val r" id="si-anomaly">--</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div
+              class="card-accent-line"
+              style="
+                background: linear-gradient(90deg, var(--adc), transparent);
+              "
+            ></div>
+            <div class="card-label">
+              <i
+                class="fas fa-trophy"
+                style="margin-right: 5px; color: var(--adc)"
+              ></i
+              >Party Results
+            </div>
+            <div class="party-result-list" id="party-results"></div>
+          </div>
+        </div>
+
+        <!-- MAIN PANEL -->
+        <div class="main-panel">
+          <!-- STATS — 5 cards -->
+          <div class="pu-stats">
+            <div class="pu-stat">
+              <div class="pu-stat-icon a">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+              <div class="pu-stat-num a" id="ms-pu">--</div>
+              <div class="pu-stat-lbl">Total Polling Units</div>
+            </div>
+            <div class="pu-stat">
+              <div class="pu-stat-icon e"><i class="fas fa-building"></i></div>
+              <div class="pu-stat-num e" id="ms-vp">--</div>
+              <div class="pu-stat-lbl">Total Voting Points</div>
+            </div>
+            <div class="pu-stat">
+              <div class="pu-stat-icon b">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <div class="pu-stat-num b" id="ms-rep">--</div>
+              <div class="pu-stat-lbl">Fully Reported</div>
+            </div>
+            <div class="pu-stat">
+              <div class="pu-stat-icon c"><i class="fas fa-spinner"></i></div>
+              <div class="pu-stat-num c" id="ms-pct">--</div>
+              <div class="pu-stat-lbl">Completion</div>
+            </div>
+            <div class="pu-stat">
+              <div class="pu-stat-icon d">
+                <i class="fas fa-exclamation-triangle"></i>
+              </div>
+              <div class="pu-stat-num d" id="ms-flag">--</div>
+              <div class="pu-stat-lbl">Flagged Units</div>
+            </div>
+          </div>
+
+          <!-- TREND CHART -->
+          <div class="card trend-card">
+            <div
+              class="card-accent-line"
+              style="
+                background: linear-gradient(90deg, var(--accent2), transparent);
+              "
+            ></div>
+            <div class="card-label">
+              <i
+                class="fas fa-chart-area"
+                style="margin-right: 5px; color: var(--accent2)"
+              ></i
+              >Cumulative Votes — Reporting Timeline
+            </div>
+            <canvas id="trendChart" height="90"></canvas>
+          </div>
+
+          <!-- POLLING UNITS TABLE -->
+          <div class="card">
+            <div
+              class="card-accent-line"
+              style="
+                background: linear-gradient(90deg, var(--accent), transparent);
+              "
+            ></div>
+            <div class="card-label">
+              <i
+                class="fas fa-list"
+                style="margin-right: 5px; color: var(--accent)"
+              ></i
+              >Polling Units
+            </div>
+            <input
+              class="pu-search"
+              type="text"
+              placeholder="Search polling unit…"
+              oninput="filterPU(this.value)"
+            />
+            <table class="pu-table">
+              <thead>
+                <tr>
+                  <th>Polling Unit</th>
+                  <th>Voting Points</th>
+                  <th>Accredited</th>
+                  <th>Votes Cast</th>
+                  <th>Leader</th>
+                  <th>Rejected</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="pu-tbody"></tbody>
+            </table>
+            <div class="pagination">
+              <span class="pag-info" id="pag-info">--</span>
+              <div class="pag-btns">
+                <button class="pag-btn" onclick="changePage(-1)">← Prev</button>
+                <button class="pag-btn active" id="pag-cur">1</button>
+                <button class="pag-btn" onclick="changePage(1)">Next →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer
+      style="
+        text-align: center;
+        padding: 2rem;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-family: &quot;IBM Plex Mono&quot;, monospace;
+        position: relative;
+        z-index: 1;
+      "
+    >
+      V-Rec · LGA Results · MVP Demo · Simulated Data
+    </footer>
+
+    <script>
+      const STATES = [
+        "Abia",
+        "Adamawa",
+        "Akwa Ibom",
+        "Anambra",
+        "Bauchi",
+        "Bayelsa",
+        "Benue",
+        "Borno",
+        "Cross River",
+        "Delta",
+        "Ebonyi",
+        "Edo",
+        "Ekiti",
+        "Enugu",
+        "Gombe",
+        "Imo",
+        "Jigawa",
+        "Kaduna",
+        "Kano",
+        "Katsina",
+        "Kebbi",
+        "Kogi",
+        "Kwara",
+        "Lagos",
+        "Nasarawa",
+        "Niger",
+        "Ogun",
+        "Ondo",
+        "Osun",
+        "Oyo",
+        "Plateau",
+        "Rivers",
+        "Sokoto",
+        "Taraba",
+        "Yobe",
+        "Zamfara",
+        "FCT",
+      ];
+      // ADC always index 0 — always wins
+      const PARTIES = [
+        { name: "ADC", color: "#FF6B00" },
+        { name: "APC", color: "#0080FF" },
+        { name: "PDP", color: "#E80020" },
+        { name: "LP", color: "#228B22" },
+        { name: "Others", color: "#94A3B8" },
+      ];
+      const LGA_NAMES = {
+        Lagos: [
+          "Agege",
+          "Ajeromi-Ifelodun",
+          "Alimosho",
+          "Amuwo-Odofin",
+          "Apapa",
+          "Badagry",
+          "Epe",
+          "Eti-Osa",
+          "Ibeju-Lekki",
+          "Ifako-Ijaiye",
+          "Ikeja",
+          "Ikorodu",
+          "Kosofe",
+          "Lagos Island",
+          "Lagos Mainland",
+          "Mushin",
+          "Ojo",
+          "Oshodi-Isolo",
+          "Shomolu",
+          "Surulere",
+        ],
+        Kano: [
+          "Dala",
+          "Fagge",
+          "Gwale",
+          "Kano Municipal",
+          "Nassarawa",
+          "Tarauni",
+          "Ungogo",
+          "Kumbotso",
+          "Doguwa",
+          "Gabasawa",
+          "Rimin Gado",
+          "Kura",
+          "Tofa",
+          "Tsanyawa",
+        ],
+        Rivers: [
+          "Port Harcourt",
+          "Obio-Akpor",
+          "Ikwerre",
+          "Etche",
+          "Oyigbo",
+          "Gokana",
+          "Khana",
+          "Tai",
+          "Eleme",
+          "Okrika",
+        ],
+        FCT: [
+          "Abuja Municipal",
+          "Bwari",
+          "Gwagwalada",
+          "Kuje",
+          "Kwali",
+          "Abaji",
+        ],
+      };
+      function getLGAs(state) {
+        return (
+          LGA_NAMES[state] ||
+          Array.from({ length: 10 }, (_, i) => `${state} LGA ${i + 1}`)
+        );
+      }
+      function rnd(a, b) {
+        return Math.floor(Math.random() * (b - a + 1)) + a;
+      }
+      function fmtN(n) {
+        return n.toLocaleString();
+      }
+
+      let trendChart = null,
+        currentPUs = [],
+        filteredPUs = [],
+        page = 1;
+      const PAGE_SIZE = 12;
+
+      function genLGAData(state, lga) {
+        const puCount = rnd(80, 400);
+        const reported = rnd(Math.floor(puCount * 0.4), puCount);
+        const pus = [];
+        for (let i = 1; i <= puCount; i++) {
+          const vp = rnd(2, 5); // 2–5 voting points per PU
+          const acc = rnd(200, 800);
+          const cast =
+            i <= reported
+              ? rnd(Math.floor(acc * 0.4), Math.floor(acc * 0.9))
+              : 0;
+          const rej = cast ? rnd(0, Math.floor(cast * 0.03)) : 0;
+          const valid = cast - rej;
+          // ADC always gets ~37-44%
+          const votes = [];
+          let rem = valid;
+          if (cast > 0) {
+            const adcPct = 0.37 + Math.random() * 0.07;
+            const adcV = Math.floor(rem * adcPct);
+            votes.push(adcV);
+            rem -= adcV;
+            for (let j = 1; j < 5; j++) {
+              if (j === 4) {
+                votes.push(Math.max(0, rem));
+              } else {
+                const v = Math.floor(rem * (0.05 + Math.random() * 0.2));
+                votes.push(v);
+                rem -= v;
+              }
+            }
+          } else {
+            for (let j = 0; j < 5; j++) votes.push(0);
+          }
+          const flagged = i <= reported && Math.random() < 0.05;
+          pus.push({
+            name: `PU ${String(i).padStart(3, "0")} · ${lga} Ward ${Math.ceil(i / 8)}`,
+            vp,
+            acc,
+            cast,
+            rej,
+            votes,
+            wi: 0,
+            reported: i <= reported,
+            flagged,
+          });
+        }
+        return pus;
+      }
+
+      function buildStateSelect() {
+        const sel = document.getElementById("stateSelect");
+        sel.innerHTML = STATES.map(
+          (s) => `<option value="${s}">${s}</option>`,
+        ).join("");
+        sel.value = "Lagos";
+      }
+
+      function onStateChange(state) {
+        const lgas = getLGAs(state);
+        const lsel = document.getElementById("lgaSelect");
+        lsel.innerHTML = lgas
+          .map((l) => `<option value="${l}">${l}</option>`)
+          .join("");
+        loadLGA(lgas[0], state);
+      }
+
+      function loadLGA(lga, state) {
+        state = state || document.getElementById("stateSelect").value;
+        document.getElementById("lga-title").textContent = lga + " LGA";
+        document.getElementById("bread-state").textContent = state;
+        document.getElementById("bread-lga").textContent = lga;
+        document.getElementById("lgaSelect").value = lga;
+
+        const pus = genLGAData(state, lga);
+        currentPUs = pus;
+        filteredPUs = [...pus];
+        page = 1;
+
+        const totalPU = pus.length;
+        const totalVP = pus.reduce((a, p) => a + p.vp, 0);
+        const reported = pus.filter((p) => p.reported).length;
+        const flagged = pus.filter((p) => p.flagged).length;
+        const pct = Math.round((reported / totalPU) * 100);
+        const totalVotes = pus.reduce((a, p) => a + p.cast, 0);
+        const totalRej = pus.reduce((a, p) => a + p.rej, 0);
+        const totalAcc = pus.reduce((a, p) => a + p.acc, 0);
+        const turnout = totalAcc
+          ? ((totalVotes / totalAcc) * 100).toFixed(1) + "%"
+          : "--";
+
+        document.getElementById("si-pu").textContent = fmtN(totalPU);
+        document.getElementById("si-vp").textContent = fmtN(totalVP);
+        document.getElementById("si-rep").textContent = fmtN(reported);
+        document.getElementById("si-pend").textContent = fmtN(
+          totalPU - reported,
+        );
+        document.getElementById("si-rej").textContent = fmtN(totalRej);
+        document.getElementById("si-acc").textContent = fmtN(totalAcc);
+        document.getElementById("si-turnout").textContent = turnout;
+        document.getElementById("si-anomaly").textContent = fmtN(flagged);
+        document.getElementById("si-totalvotes").textContent = fmtN(totalVotes);
+        document.getElementById("ms-pu").textContent = fmtN(totalPU);
+        document.getElementById("ms-vp").textContent = fmtN(totalVP);
+        document.getElementById("ms-rep").textContent = fmtN(reported);
+        document.getElementById("ms-pct").textContent = pct + "%";
+        document.getElementById("ms-flag").textContent = fmtN(flagged);
+
+        const partyTotals = PARTIES.map((_, i) =>
+          pus.reduce((a, p) => a + (p.votes[i] || 0), 0),
+        );
+        const maxV = Math.max(...partyTotals);
+        const totalV = partyTotals.reduce((a, b) => a + b, 0);
+
+        document.getElementById("party-results").innerHTML = PARTIES.map(
+          (p, i) => `
+    <div class="pr-item">
+      <div class="pr-header">
+        <div class="pr-party"><div class="pr-dot" style="background:${p.color}"></div>${p.name}${i === 0 ? ' <i class="fas fa-crown" style="color:var(--adc);font-size:0.6rem;margin-left:4px"></i>' : ""}</div>
+        <span class="pr-votes">${fmtN(partyTotals[i])}</span>
+      </div>
+      <div class="pr-bar"><div class="pr-fill" data-w="${maxV ? ((partyTotals[i] / maxV) * 100).toFixed(1) : 0}" style="width:0%;background:${p.color}"></div></div>
+      <div class="pr-pct">${totalV ? ((partyTotals[i] / totalV) * 100).toFixed(1) : 0}%</div>
+    </div>`,
+        ).join("");
+        setTimeout(() => {
+          document.querySelectorAll(".pr-fill").forEach((el) => {
+            el.style.width = el.dataset.w + "%";
+          });
+        }, 100);
+
+        const hours = Array.from({ length: 12 }, (_, i) => `${8 + i}:00`);
+        const trendData = PARTIES.map((p, pi) => {
+          let cum = 0;
+          return hours.map(() => {
+            cum += Math.floor(partyTotals[pi] * (0.04 + Math.random() * 0.12));
+            return Math.min(cum, partyTotals[pi]);
+          });
+        });
+        if (trendChart) {
+          trendChart.destroy();
+        }
+        const tctx = document.getElementById("trendChart").getContext("2d");
+        trendChart = new Chart(tctx, {
+          type: "line",
+          data: {
+            labels: hours,
+            datasets: PARTIES.map((p, i) => ({
+              label: p.name,
+              data: trendData[i],
+              borderColor: p.color,
+              backgroundColor: p.color + "15",
+              borderWidth: 2,
+              pointRadius: 2,
+              fill: false,
+              tension: 0.4,
+            })),
+          },
+          options: {
+            plugins: {
+              legend: {
+                labels: {
+                  color: "#5A8A7A",
+                  font: { family: "IBM Plex Mono", size: 10 },
+                  boxWidth: 10,
+                },
+              },
+            },
+            scales: {
+              x: {
+                grid: { color: "rgba(26,46,58,0.5)" },
+                ticks: {
+                  color: "#5A8A7A",
+                  font: { family: "IBM Plex Mono", size: 10 },
+                },
+              },
+              y: {
+                grid: { color: "rgba(26,46,58,0.5)" },
+                ticks: {
+                  color: "#5A8A7A",
+                  font: { family: "IBM Plex Mono", size: 10 },
+                  callback: (v) => (v >= 1e3 ? (v / 1e3).toFixed(0) + "K" : v),
+                },
+              },
+            },
+            animation: { duration: 800 },
+          },
+        });
+
+        renderPUTable();
+      }
+
+      function renderPUTable() {
+        const start = (page - 1) * PAGE_SIZE;
+        const slice = filteredPUs.slice(start, start + PAGE_SIZE);
+        const tbody = document.getElementById("pu-tbody");
+        tbody.innerHTML = slice
+          .map((p) => {
+            const w = PARTIES[0]; // ADC
+            const sc = p.flagged ? "t-flag" : p.reported ? "t-ok" : "t-pend";
+            const sl = p.flagged
+              ? "Flagged"
+              : p.reported
+                ? "Submitted"
+                : "Pending";
+            const dc = p.flagged ? "s-flag" : p.reported ? "s-ok" : "s-pend";
+            return `<tr>
+      <td><span class="status-dot ${dc}"></span>${p.name}</td>
+      <td class="mono">${p.vp}</td>
+      <td class="mono">${fmtN(p.acc)}</td>
+      <td class="mono">${p.cast ? fmtN(p.cast) : "—"}</td>
+      <td>${p.reported ? `<span style="color:${w.color};font-size:0.8rem;font-weight:500">${w.name}</span>` : "—"}</td>
+      <td class="mono">${p.cast ? fmtN(p.rej) : "—"}</td>
+      <td><span class="tag ${sc}">${sl}</span></td>
+    </tr>`;
+          })
+          .join("");
+        document.getElementById("pag-info").textContent =
+          `Showing ${start + 1}–${Math.min(start + PAGE_SIZE, filteredPUs.length)} of ${filteredPUs.length}`;
+        document.getElementById("pag-cur").textContent = page;
+      }
+
+      function filterPU(q) {
+        filteredPUs = currentPUs.filter((p) =>
+          p.name.toLowerCase().includes(q.toLowerCase()),
+        );
+        page = 1;
+        renderPUTable();
+      }
+      function changePage(d) {
+        const max = Math.ceil(filteredPUs.length / PAGE_SIZE);
+        page = Math.max(1, Math.min(page + d, max));
+        renderPUTable();
+      }
+
+      buildStateSelect();
+      const lgaNames = getLGAs("Lagos");
+      const lsel = document.getElementById("lgaSelect");
+      lsel.innerHTML = lgaNames
+        .map((l) => `<option value="${l}">${l}</option>`)
+        .join("");
+      lsel.value = "Alimosho";
+      loadLGA("Alimosho", "Lagos");
+
+      document
+        .getElementById("stateSelect")
+        .addEventListener("change", function () {
+          const lgas = getLGAs(this.value);
+          const ls = document.getElementById("lgaSelect");
+          ls.innerHTML = lgas
+            .map((l) => `<option value="${l}">${l}</option>`)
+            .join("");
+          loadLGA(lgas[0], this.value);
+        });
+    </script>
+  </body>
+</html>

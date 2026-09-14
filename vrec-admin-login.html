@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V-Rec · Admin Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root{--bg:#050A0E;--surface:#0C1419;--surface2:#111D25;--border:#1A2E3A;--border2:#1F3545;--text:#E8F4F0;--muted:#5A8A7A;--accent:#00E5A0;--accent2:#00B4D8;--gold:#F4C842;--red:#FF4B5C;--adc:#FF6B00;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow:hidden;display:flex;}
+
+  .left{flex:1;position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:3rem;overflow:hidden;}
+  .left-bg{position:absolute;inset:0;background:linear-gradient(135deg,#050A0E 0%,#071218 50%,#0A1A22 100%);}
+  .left-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,229,160,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,160,0.04) 1px,transparent 1px);background-size:40px 40px;}
+  .left-glow{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,0,0.07) 0%,transparent 70%);top:-100px;left:-100px;}
+  .left-glow2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(0,180,216,0.05) 0%,transparent 70%);bottom:-100px;right:-50px;}
+  .left-content{position:relative;z-index:1;}
+  .left-bottom{position:relative;z-index:1;}
+
+  .logo{display:flex;align-items:center;gap:12px;margin-bottom:2.5rem;}
+  .logo-mark{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800;color:#050A0E;font-family:'Syne',sans-serif;}
+  .logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:-0.02em;}
+  .logo-text span{color:var(--accent);}
+  .logo-sub{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;}
+  .left-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;line-height:1.1;letter-spacing:-0.04em;margin-bottom:0.8rem;}
+  .left-title span{color:var(--accent);}
+  .left-desc{color:var(--muted);font-size:0.85rem;font-weight:300;max-width:380px;line-height:1.6;}
+
+  .hier-label{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin:1.5rem 0 0.7rem;display:flex;align-items:center;gap:6px;}
+  .hierarchy{display:flex;flex-direction:column;gap:0;}
+  .hier-item{display:flex;align-items:center;gap:11px;padding:8px 12px;border-left:2px solid var(--border);}
+  .hier-item:nth-child(1){border-color:var(--adc);}
+  .hier-item:nth-child(2){border-color:var(--accent);}
+  .hier-item:nth-child(3){border-color:var(--accent2);}
+  .hier-item:nth-child(4){border-color:var(--gold);}
+  .hier-item:nth-child(5){border-color:#8B5CF6;}
+  .hier-item:nth-child(6){border-color:#E80020;}
+  .hier-item:nth-child(7){border-color:var(--muted);}
+  .hier-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;flex-shrink:0;}
+  .hier-main{font-size:0.8rem;font-weight:500;}
+  .hier-scope{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--muted);}
+
+  .live-strip{display:flex;align-items:center;gap:10px;padding:11px 15px;background:rgba(0,229,160,0.04);border:1px solid rgba(0,229,160,0.12);border-radius:10px;}
+  .live-dot{width:7px;height:7px;background:var(--red);border-radius:50%;animation:pulse 1.4s ease infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(0.7);}}
+  .live-text{font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--muted);}
+  .live-text span{color:var(--accent);}
+
+  .right{width:500px;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;padding:2.8rem 2.6rem;position:relative;overflow-y:auto;}
+  .right::before{content:'';position:absolute;top:0;right:0;width:200px;height:200px;background:radial-gradient(circle,rgba(0,180,216,0.05) 0%,transparent 70%);pointer-events:none;}
+
+  .form-header{margin-bottom:1.5rem;}
+  .form-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,75,92,0.1);border:1px solid rgba(255,75,92,0.25);border-radius:20px;padding:4px 12px;font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--red);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:1rem;}
+  .form-title{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;letter-spacing:-0.03em;}
+  .form-sub{color:var(--muted);font-size:0.82rem;margin-top:6px;}
+
+  .role-section-label{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+  .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:1.4rem;}
+  .role-tab{padding:8px 10px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:9px;}
+  .role-tab:hover{border-color:var(--border2);}
+  .role-tab.active{background:rgba(0,229,160,0.07);border-color:rgba(0,229,160,0.35);}
+  .role-tab.full{grid-column:1/-1;}
+  .role-icon-wrap{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.68rem;flex-shrink:0;}
+  .role-name{font-size:0.73rem;font-weight:500;line-height:1.2;}
+  .role-tab.active .role-name{color:var(--accent);}
+  .role-scope{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:var(--muted);}
+
+  .form-group{margin-bottom:1rem;}
+  .form-label{font-family:'IBM Plex Mono',monospace;font-size:0.67rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);display:flex;align-items:center;gap:5px;margin-bottom:7px;}
+  .form-label i{font-size:0.62rem;}
+  .form-input{width:100%;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:11px 14px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:0.9rem;outline:none;transition:border-color 0.2s;}
+  .form-input:focus{border-color:var(--accent);}
+  .form-input::placeholder{color:var(--muted);}
+  .input-wrap{position:relative;}
+  .input-icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);cursor:pointer;font-size:0.78rem;}
+  .input-icon:hover{color:var(--text);}
+
+  .otp-row{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:4px;}
+  .otp-input{background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:12px 4px;border-radius:8px;font-family:'IBM Plex Mono',monospace;font-size:1.1rem;font-weight:600;text-align:center;outline:none;transition:all 0.2s;}
+  .otp-input:focus{border-color:var(--accent);background:rgba(0,229,160,0.05);}
+  .otp-hint{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between;align-items:center;}
+  .otp-resend{color:var(--accent);cursor:pointer;}
+  .otp-resend:hover{text-decoration:underline;}
+
+  .forgot{text-align:right;margin-top:-4px;margin-bottom:1.2rem;}
+  .forgot a{font-size:0.77rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;}
+  .forgot a:hover{color:var(--accent);}
+
+  .btn-submit{width:100%;background:var(--accent);color:#050A0E;padding:12px;border-radius:8px;font-family:'Syne',sans-serif;font-size:0.92rem;font-weight:700;border:none;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-submit:hover{background:#00ccaa;transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,229,160,0.2);}
+  .btn-submit i{font-size:0.78rem;}
+  .btn-secondary{width:100%;background:var(--surface2);color:var(--text);border:1px solid var(--border2);padding:11px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:0.88rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+
+  .divider{display:flex;align-items:center;gap:12px;margin:1.1rem 0;}
+  .div-line{flex:1;height:1px;background:var(--border);}
+  .div-text{font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:var(--muted);}
+
+  .security-note{display:flex;align-items:flex-start;gap:10px;padding:10px 13px;background:rgba(244,200,66,0.04);border:1px solid rgba(244,200,66,0.12);border-radius:8px;margin-top:1.1rem;}
+  .sec-icon{font-size:0.78rem;flex-shrink:0;margin-top:2px;color:var(--gold);}
+  .sec-text{font-size:0.71rem;color:var(--muted);line-height:1.5;}
+
+  .steps{display:flex;align-items:center;gap:6px;margin-bottom:1.8rem;}
+  .step{display:flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:0.67rem;}
+  .step-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:600;flex-shrink:0;}
+  .step.done .step-num{background:var(--accent);color:#050A0E;}
+  .step.active .step-num{background:var(--surface2);border:1px solid var(--accent);color:var(--accent);}
+  .step.pending .step-num{background:var(--surface2);border:1px solid var(--border);color:var(--muted);}
+  .step.active .step-label,.step.done .step-label{color:var(--text);}
+  .step.pending .step-label{color:var(--muted);}
+  .step-line{flex:1;height:1px;background:var(--border);}
+  .step.done+.step-line{background:var(--accent);}
+
+  .alert{padding:9px 13px;border-radius:8px;font-size:0.78rem;margin-bottom:1rem;display:none;align-items:center;gap:8px;}
+  .alert i{font-size:0.72rem;flex-shrink:0;}
+  .alert.error{background:rgba(255,75,92,0.08);border:1px solid rgba(255,75,92,0.25);color:var(--red);}
+  .alert.success{background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.25);color:var(--accent);}
+  .alert.show{display:flex;}
+
+  .success-icon{width:60px;height:60px;background:rgba(0,229,160,0.1);border:2px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.3rem;font-size:1.3rem;color:var(--accent);}
+  .session-card{margin-top:1.3rem;padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;text-align:left;}
+  .sess-row{display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;padding:6px 0;border-bottom:1px solid rgba(26,46,58,0.5);}
+  .sess-row:last-child{border-bottom:none;}
+  .sess-key{color:var(--muted);display:flex;align-items:center;gap:5px;font-size:0.76rem;}
+  .sess-key i{font-size:0.62rem;}
+  .sess-val{font-family:'IBM Plex Mono',monospace;font-size:0.74rem;}
+
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  @media(max-width:950px){.left{display:none;}.right{width:100%;border-left:none;padding:2rem 1.5rem;}}
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="left">
+  <div class="left-bg"></div><div class="left-grid"></div><div class="left-glow"></div><div class="left-glow2"></div>
+  <div class="left-content">
+    <div class="logo">
+      <div class="logo-mark">VR</div>
+      <div>
+        <div class="logo-text">V-<span>Rec</span></div>
+        <div class="logo-sub">Election Intelligence Platform</div>
+      </div>
+    </div>
+    <div class="left-title">Secure<br>Admin <span>Portal</span></div>
+    <div class="left-desc">Authorized personnel only. All access is logged with timestamp, IP address, and device fingerprint for full accountability.</div>
+
+    <div class="hier-label"><i class="fas fa-sitemap"></i>Officer Hierarchy</div>
+    <div class="hierarchy">
+      <div class="hier-item">
+        <div class="hier-icon" style="background:rgba(255,107,0,0.12);color:var(--adc)"><i class="fas fa-shield-halved"></i></div>
+        <div><div class="hier-main">Admin</div><div class="hier-scope">Full system control</div></div>
+      </div>
+      <div class="hier-item">
+        <div class="hier-icon" style="background:rgba(0,229,160,0.1);color:var(--accent)"><i class="fas fa-globe-africa"></i></div>
+        <div><div class="hier-main">National Officer</div><div class="hier-scope">Nationwide oversight</div></div>
+      </div>
+      <div class="hier-item">
+        <div class="hier-icon" style="background:rgba(0,180,216,0.1);color:var(--accent2)"><i class="fas fa-map"></i></div>
+        <div><div class="hier-main">State Officer</div><div class="hier-scope">State-level collation</div></div>
+      </div>
+      <div class="hier-item">
+        <div class="hier-icon" style="background:rgba(244,200,66,0.1);color:var(--gold)"><i class="fas fa-city"></i></div>
+        <div><div class="hier-main">LGA Officer</div><div class="hier-scope">Local Government Area</div></div>
+      </div>
+      <div class="hier-item">
+        <div class="hier-icon" style="background:rgba(139,92,246,0.1);color:#8B5CF6"><i class="fas fa-building-columns"></i></div>
+        <div><div class="hier-main">Ward Officer</div><div class="hier-scope">Ward collation center</div></div>
+      </div>
+      <div class="hier-item">
+        <div class="hier-icon" style="background:rgba(232,0,32,0.1);color:#E80020"><i class="fas fa-map-marker-alt"></i></div>
+        <div><div class="hier-main">Polling Unit (PU) Officer</div><div class="hier-scope">Polling unit data submission</div></div>
+      </div>
+      <div class="hier-item">
+        <div class="hier-icon" style="background:rgba(90,138,122,0.1);color:var(--muted)"><i class="fas fa-person-booth"></i></div>
+        <div><div class="hier-main">Voting Point Officer</div><div class="hier-scope">Voting area / booth level</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="left-bottom">
+    <div class="live-strip">
+      <div class="live-dot"></div>
+      <div class="live-text"><i class="fas fa-server" style="margin-right:5px;font-size:0.6rem"></i>System: <span>Online · 99.9% uptime</span> &nbsp;·&nbsp; <span id="active-users">247</span> active sessions</div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right">
+
+  <!-- SCREEN 1: CREDENTIALS -->
+  <div class="screen active" id="screen-1">
+    <div class="form-header">
+      <div class="form-badge"><span style="width:6px;height:6px;background:var(--red);border-radius:50%;display:inline-block;animation:pulse 1.4s ease infinite;margin-right:2px"></span>Restricted Access</div>
+      <div class="form-title">Sign In</div>
+      <div class="form-sub">Select your role, then enter your authorized credentials</div>
+    </div>
+
+    <div class="role-section-label"><i class="fas fa-id-badge"></i>Select Your Role</div>
+    <div class="role-grid" id="role-grid"></div>
+
+    <div class="alert error" id="alert-1"><i class="fas fa-circle-xmark"></i><span>Invalid credentials. Please check your details.</span></div>
+
+    <div class="form-group">
+      <label class="form-label"><i class="fas fa-envelope"></i>Official Email Address</label>
+      <input class="form-input" type="email" id="email" placeholder="officer@vrec.gov.ng">
+    </div>
+    <div class="form-group">
+      <label class="form-label"><i class="fas fa-lock"></i>Password</label>
+      <div class="input-wrap">
+        <input class="form-input" type="password" id="password" placeholder="••••••••••••" style="padding-right:44px">
+        <span class="input-icon" onclick="togglePwd()"><i class="fas fa-eye" id="pwd-eye"></i></span>
+      </div>
+    </div>
+
+    <div class="forgot"><a href="#"><i class="fas fa-key"></i>Forgot password?</a></div>
+    <button class="btn-submit" onclick="doLogin()"><i class="fas fa-arrow-right-to-bracket"></i>Continue to Verification</button>
+    <div class="security-note">
+      <i class="fas fa-lock sec-icon"></i>
+      <span class="sec-text">All login attempts are recorded. Unauthorized access is a criminal offence under the Nigerian Cybercrimes Act 2015.</span>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: OTP -->
+  <div class="screen" id="screen-2">
+    <div class="steps">
+      <div class="step done"><div class="step-num"><i class="fas fa-check" style="font-size:0.48rem"></i></div><span class="step-label">Credentials</span></div>
+      <div class="step-line"></div>
+      <div class="step active"><div class="step-num">2</div><span class="step-label">Verification</span></div>
+      <div class="step-line"></div>
+      <div class="step pending"><div class="step-num">3</div><span class="step-label">Access</span></div>
+    </div>
+    <div class="form-header">
+      <div class="form-title">2-Factor Auth</div>
+      <div class="form-sub">Enter the 6-digit code sent to <span id="masked-email" style="color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:0.8rem"></span></div>
+    </div>
+    <div class="alert error" id="alert-2"><i class="fas fa-circle-xmark"></i><span>Incorrect code. Please try again.</span></div>
+    <div class="alert success" id="alert-otp-sent"><i class="fas fa-circle-check"></i><span>A new code has been sent to your email.</span></div>
+    <div class="form-group">
+      <label class="form-label"><i class="fas fa-shield-halved"></i>One-Time Password</label>
+      <div class="otp-row" id="otp-row"></div>
+      <div class="otp-hint">
+        <span><i class="fas fa-clock" style="margin-right:3px;font-size:0.6rem"></i><span id="otp-timer">Code expires in 04:59</span></span>
+        <span class="otp-resend" onclick="resendOTP()"><i class="fas fa-rotate" style="margin-right:3px;font-size:0.6rem"></i>Resend code</span>
+      </div>
+    </div>
+    <button class="btn-submit" onclick="verifyOTP()" style="margin-top:1.4rem"><i class="fas fa-right-to-bracket"></i>Verify & Enter Dashboard</button>
+    <div class="divider"><div class="div-line"></div><span class="div-text">OR</span><div class="div-line"></div></div>
+    <button class="btn-secondary" onclick="goBack()"><i class="fas fa-arrow-left"></i>Back to Login</button>
+    <div class="security-note">
+      <i class="fas fa-triangle-exclamation sec-icon" style="color:var(--red)"></i>
+      <span class="sec-text">Never share this code with anyone. V-Rec staff will never ask for your OTP under any circumstances.</span>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: SUCCESS -->
+  <div class="screen" id="screen-3">
+    <div style="text-align:center;padding:0.5rem 0;">
+      <div class="success-icon"><i class="fas fa-check"></i></div>
+      <div class="form-title" style="font-size:1.4rem">Access Granted</div>
+      <div class="form-sub" style="margin-top:8px">Welcome back, <span id="user-role-name" style="color:var(--accent)"></span></div>
+      <div class="session-card">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;display:flex;align-items:center;gap:5px;"><i class="fas fa-circle-info" style="font-size:0.6rem"></i>Session Info</div>
+        <div class="sess-row"><span class="sess-key"><i class="fas fa-id-badge"></i>Role</span><span class="sess-val" id="sess-role" style="color:var(--accent)"></span></div>
+        <div class="sess-row"><span class="sess-key"><i class="fas fa-envelope"></i>Email</span><span class="sess-val" id="sess-email" style="color:var(--muted)"></span></div>
+        <div class="sess-row"><span class="sess-key"><i class="fas fa-clock"></i>Login time</span><span class="sess-val" id="sess-time"></span></div>
+        <div class="sess-row"><span class="sess-key"><i class="fas fa-fingerprint"></i>Session ID</span><span class="sess-val" id="sess-id" style="color:var(--muted)"></span></div>
+      </div>
+      <div style="margin-top:1rem;font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:5px;">
+        <i class="fas fa-spinner fa-spin" style="font-size:0.62rem"></i>
+        Redirecting in <span id="redirect-count" style="color:var(--accent);margin:0 3px">3</span>s…
+      </div>
+      <button class="btn-submit" style="margin-top:1.2rem" onclick="window.location.href='index.html'"><i class="fas fa-gauge-high"></i>Go to Dashboard</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ROLES=[
+  {name:'Admin',               scope:'Full system control',    icon:'fa-shield-halved',   bg:'rgba(255,107,0,0.12)', color:'#FF6B00', full:true},
+  {name:'National Officer',    scope:'Nationwide oversight',   icon:'fa-globe-africa',    bg:'rgba(0,229,160,0.1)',  color:'#00E5A0'},
+  {name:'State Officer',       scope:'State-level results',    icon:'fa-map',             bg:'rgba(0,180,216,0.1)',  color:'#00B4D8'},
+  {name:'LGA Officer',         scope:'Local Government Area',  icon:'fa-city',            bg:'rgba(244,200,66,0.1)', color:'#F4C842'},
+  {name:'Ward Officer',        scope:'Ward collation center',  icon:'fa-building-columns',bg:'rgba(139,92,246,0.1)',color:'#8B5CF6'},
+  {name:'PU Officer',          scope:'Polling unit submission', icon:'fa-map-marker-alt',  bg:'rgba(232,0,32,0.1)',  color:'#E80020'},
+  {name:'Voting Point Officer',scope:'Voting area / booth',    icon:'fa-person-booth',    bg:'rgba(90,138,122,0.1)',color:'#5A8A7A'},
+];
+
+let selectedRole='Admin', otpInterval=null;
+
+function buildRoleGrid(){
+  document.getElementById('role-grid').innerHTML=ROLES.map((r,i)=>`
+    <div class="role-tab ${i===0?'active':''} ${r.full?'full':''}" onclick="selectRole(this,'${r.name}')">
+      <div class="role-icon-wrap" style="background:${r.bg};color:${r.color}"><i class="fas ${r.icon}"></i></div>
+      <div>
+        <div class="role-name">${r.name}</div>
+        <div class="role-scope">${r.scope}</div>
+      </div>
+    </div>`).join('');
+}
+buildRoleGrid();
+
+function selectRole(el,role){
+  document.querySelectorAll('.role-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  selectedRole=role;
+}
+function togglePwd(){
+  const inp=document.getElementById('password');
+  const eye=document.getElementById('pwd-eye');
+  inp.type=inp.type==='password'?'text':'password';
+  eye.className=inp.type==='password'?'fas fa-eye':'fas fa-eye-slash';
+}
+function maskEmail(e){const[u,d]=e.split('@');return u.slice(0,2)+'***@'+d;}
+
+function doLogin(){
+  const email=document.getElementById('email').value.trim();
+  const pwd=document.getElementById('password').value.trim();
+  const a=document.getElementById('alert-1');
+  if(!email||!pwd){a.querySelector('span').textContent='Please fill in all fields.';a.classList.add('show');return;}
+  if(email!=='admin@vrec.gov.ng'||pwd!=='admin123'){a.querySelector('span').textContent='Invalid credentials. Please check your email and password.';a.classList.add('show');return;}
+  a.classList.remove('show');
+  document.getElementById('masked-email').textContent=maskEmail(email);
+  showScreen('screen-2');buildOTP();startTimer(299);
+}
+
+function buildOTP(){
+  document.getElementById('otp-row').innerHTML=Array.from({length:6},(_,i)=>
+    `<input class="otp-input" maxlength="1" id="otp-${i}" oninput="otpNext(this,${i})" onkeydown="otpBack(event,${i})">`).join('');
+  document.getElementById('otp-0').focus();
+}
+function otpNext(el,i){if(el.value&&i<5)document.getElementById('otp-'+(i+1)).focus();}
+function otpBack(e,i){if(e.key==='Backspace'&&!e.target.value&&i>0)document.getElementById('otp-'+(i-1)).focus();}
+
+function startTimer(s){
+  clearInterval(otpInterval);
+  otpInterval=setInterval(()=>{
+    if(s<=0){clearInterval(otpInterval);document.getElementById('otp-timer').textContent='Code expired';return;}
+    s--;
+    document.getElementById('otp-timer').textContent=`Code expires in ${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  },1000);
+}
+function resendOTP(){
+  const a=document.getElementById('alert-otp-sent');
+  a.classList.add('show');setTimeout(()=>a.classList.remove('show'),3000);startTimer(299);
+}
+
+function verifyOTP(){
+  const code=Array.from({length:6},(_,i)=>document.getElementById('otp-'+i)?.value||'').join('');
+  if(code.length===6){
+    clearInterval(otpInterval);
+    const email=document.getElementById('email').value;
+    document.getElementById('user-role-name').textContent=selectedRole;
+    document.getElementById('sess-role').textContent=selectedRole;
+    document.getElementById('sess-email').textContent=maskEmail(email);
+    document.getElementById('sess-time').textContent=new Date().toLocaleTimeString('en-NG',{hour12:false});
+    document.getElementById('sess-id').textContent='SID-'+Math.random().toString(36).slice(2,10).toUpperCase();
+    showScreen('screen-3');
+    let n=3;
+    const ri=setInterval(()=>{n--;document.getElementById('redirect-count').textContent=n;if(n<=0){clearInterval(ri);window.location.href='index.html';}},1000);
+  } else {
+    document.getElementById('alert-2').classList.add('show');
+  }
+}
+function goBack(){showScreen('screen-1');}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('email').value='admin@vrec.gov.ng';
+  document.getElementById('password').value='admin123';
+});
+setInterval(()=>{const el=document.getElementById('active-users');if(el)el.textContent=247+Math.floor(Math.random()*8-4);},4000);
+</script>
+</body>
+</html>

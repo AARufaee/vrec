@@ -1,0 +1,1599 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>V-Rec · Nigeria Election Intelligence Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+            :root {
+        --bg: #ffffff;
+        --surface: #f8fafc;
+        --surface2: #eef2f6;
+
+        --border: #e2e8f0;
+        --border2: #d6dee8;
+
+        --text: #0f172a;
+        --muted: #64748b;
+
+        --accent: #00a86b;
+        --accent2: #0284c7;
+
+        --gold: #d4a017;
+        --red: #dc2626;
+        --green: #16a34a;
+
+        --adc: #ff6b00;
+        --apc: #007bff;
+        --pdp: #d90429;
+        --lp: #2e7d32;
+        --nnpp: #7c3aed;
+        --others: #94a3b8;
+        }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Outfit", sans-serif;
+        font-weight: 400;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      body::before {
+          content: "";
+          position: fixed;
+          inset: 0;
+          background-image:
+            radial-gradient(
+              ellipse 80% 50% at 20% -10%,
+              rgba(255, 107, 0, 0.04) 0%,
+              transparent 60%
+            ),
+            radial-gradient(
+              ellipse 60% 40% at 80% 110%,
+              rgba(2, 132, 199, 0.04) 0%,
+              transparent 60%
+            );
+          pointer-events: none;
+          z-index: 0;
+        }
+
+      /* ── TOPBAR ── */
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2rem;
+        height: 56px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border);
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+         font-family: "Open Sans", sans-serif;
+        font-weight: 800;
+        font-size: 1.15rem;
+        letter-spacing: -0.02em;
+      }
+      .logo-mark {
+        width: 28px;
+        height: 28px;
+        background: var(--accent);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #050a0e;
+      }
+      .logo span {
+        color: var(--accent);
+      }
+
+      .live-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 75, 92, 0.12);
+        border: 1px solid rgba(255, 75, 92, 0.3);
+        border-radius: 20px;
+        padding: 4px 12px;
+        font-family: "Open Sans", monospace;
+        font-size: 0.68rem;
+        color: var(--red);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .live-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--red);
+        border-radius: 50%;
+        animation: pulse 1.4s ease infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(0.7);
+        }
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 0;
+      }
+      .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 0.82rem;
+        padding: 6px 14px;
+        border-radius: 6px;
+        transition: all 0.2s;
+        font-weight: 500;
+      }
+      .nav-links a:hover,
+      .nav-links a.active {
+        color: var(--text);
+        background: var(--surface2);
+      }
+      .nav-links a.active {
+        color: var(--accent);
+      }
+
+      .topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .clock {
+        font-family: "Open Sans", monospace;
+        font-size: 0.72rem;
+        color: var(--muted);
+      }
+      .btn-login {
+        background: var(--surface2);
+        border: 1px solid var(--border2);
+        color: var(--text);
+        padding: 6px 16px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        font-family: "Outfit", sans-serif;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .btn-login:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      /* ── MAIN LAYOUT ── */
+      main {
+        padding-top: 56px;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* ── HERO STRIP ── */
+      .hero {
+        padding: 2.5rem 2rem 2rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .hero-inner {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+      }
+      .hero-title {
+         font-family: "Open Sans", sans-serif;
+        font-size: clamp(1.6rem, 3vw, 2.4rem);
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+      }
+      .hero-title span {
+        color: var(--accent);
+      }
+      .hero-sub {
+        color: var(--muted);
+        font-size: 0.88rem;
+        margin-top: 6px;
+        font-weight: 300;
+      }
+      .election-meta {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+      }
+      .meta-item {
+        text-align: right;
+      }
+      .meta-label {
+        font-size: 0.68rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-family: "Open Sans", monospace;
+      }
+      .meta-value {
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-top: 2px;
+      }
+      .meta-value.accent {
+        color: var(--accent);
+      }
+      .meta-value.gold {
+        color: var(--gold);
+      }
+
+      /* ── LEADING BANNER ── */
+      .leading-banner-wrap {
+        background: #f8fafc;
+        border-bottom: 1px solid var(--border);
+        padding: 0 2rem;
+      }
+      .leading-banner {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1rem 0;
+      }
+      .leading-box {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 107, 0, 0.08),
+          rgba(255, 255, 255, 0.9)
+        );
+        border: 1px solid rgba(255, 107, 0, 0.2);
+        border-radius: 14px;
+        padding: 1.2rem 1.6rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+      .leading-box::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--adc), transparent 70%);
+      }
+      .leading-crown {
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 107, 0, 0.12);
+        border: 1px solid rgba(255, 107, 0, 0.25);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.3rem;
+        color: var(--adc);
+      }
+      .leading-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .leading-eyebrow {
+        font-family: "Open Sans", monospace;
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--adc);
+        margin-bottom: 4px;
+      }
+      .leading-party-name {
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--text);
+        line-height: 1;
+      }
+      .leading-detail {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .leading-stats {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+        flex-shrink: 0;
+      }
+      .leading-pct {
+        text-align: center;
+      }
+      .leading-pct-num {
+         font-family: "Open Sans", sans-serif;
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--adc);
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+      .leading-pct-label {
+        font-family: "Open Sans", monospace;
+        font-size: 0.6rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .leading-margin {
+        background: rgba(0, 229, 160, 0.08);
+        border: 1px solid rgba(0, 229, 160, 0.2);
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        text-align: center;
+      }
+      .leading-margin-num {
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--accent);
+        letter-spacing: -0.02em;
+      }
+      .leading-margin-label {
+        font-size: 0.68rem;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .leading-pulse {
+        width: 10px;
+        height: 10px;
+        background: var(--adc);
+        border-radius: 50%;
+        animation: pulse 1.4s ease infinite;
+        flex-shrink: 0;
+      }
+
+      /* ── CONTENT GRID ── */
+      .content {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: auto;
+        gap: 1.25rem;
+      }
+
+      /* ── CARDS ── */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.2s;
+      }
+      .card:hover {
+        border-color: var(--border2);
+      }
+      .card-label {
+        font-family: "Open Sans", monospace;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+        margin-bottom: 0.75rem;
+      }
+      .card-accent-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+      }
+
+      /* STAT CARDS ROW */
+      .stat-cards {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 1rem;
+      }
+      .stat-card {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.2rem 1.4rem;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .stat-card::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 40%;
+        background: linear-gradient(
+          to top,
+          rgba(0, 229, 160, 0.03),
+          transparent
+        );
+      }
+      .stat-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 8px;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+      }
+      .stat-icon.green {
+        background: rgba(0, 229, 160, 0.1);
+        color: var(--accent);
+      }
+      .stat-icon.blue {
+        background: rgba(0, 180, 216, 0.1);
+        color: var(--accent2);
+      }
+      .stat-icon.gold {
+        background: rgba(244, 200, 66, 0.1);
+        color: var(--gold);
+      }
+      .stat-icon.red {
+        background: rgba(255, 75, 92, 0.1);
+        color: var(--red);
+      }
+      .stat-icon.white {
+        background: rgba(232, 244, 240, 0.06);
+        color: var(--text);
+      }
+      .stat-icon.orange {
+        background: rgba(255, 107, 0, 0.1);
+        color: var(--adc);
+      }
+
+      .stat-num {
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.75rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1;
+        color: var(--accent);
+      }
+      .stat-num.blue {
+        color: var(--accent2);
+      }
+      .stat-num.gold {
+        color: var(--gold);
+      }
+      .stat-num.red {
+        color: var(--red);
+      }
+      .stat-num.white {
+        color: var(--text);
+      }
+      .stat-num.orange {
+        color: var(--adc);
+      }
+      .stat-label {
+        font-size: 0.73rem;
+        color: var(--muted);
+        margin-top: 2px;
+        font-weight: 400;
+        line-height: 1.3;
+      }
+      .stat-change {
+        font-family: "Open Sans", monospace;
+        font-size: 0.63rem;
+        color: var(--accent);
+        margin-top: 2px;
+      }
+      .stat-change.neg {
+        color: var(--red);
+      }
+
+      /* PARTY STANDINGS - WIDE */
+      .party-card {
+        grid-column: 1 / 3;
+      }
+      .party-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+      .party-table th {
+        font-family: "Open Sans", monospace;
+        font-size: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        text-align: left;
+        padding: 0 0 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .party-table th:not(:first-child) {
+        text-align: right;
+      }
+      .party-table td {
+        padding: 11px 0;
+        border-bottom: 1px solid rgba(26, 46, 58, 0.5);
+        font-size: 0.85rem;
+        vertical-align: middle;
+      }
+      .party-table td:not(:first-child) {
+        text-align: right;
+      }
+      .party-table tr:last-child td {
+        border-bottom: none;
+      }
+      .party-name-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 500;
+      }
+      .party-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .votes-num {
+        font-family: "Open Sans", monospace;
+        font-size: 0.88rem;
+      }
+      .bar-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+      .mini-bar {
+        width: 80px;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .mini-bar-fill {
+        height: 100%;
+        border-radius: 2px;
+        transition: width 1.5s ease;
+      }
+      .pct-label {
+        font-family: "Open Sans", monospace;
+        font-size: 0.72rem;
+        color: var(--muted);
+        min-width: 36px;
+        text-align: right;
+      }
+      .rank-badge {
+        font-family: "Open Sans", monospace;
+        font-size: 0.65rem;
+        padding: 2px 7px;
+        border-radius: 4px;
+        font-weight: 500;
+      }
+      .rank-1 {
+        background: rgba(255, 107, 0, 0.15);
+        color: var(--adc);
+      }
+      .rank-2 {
+        background: rgba(0, 128, 255, 0.1);
+        color: var(--apc);
+      }
+      .rank-3 {
+        background: rgba(0, 229, 160, 0.1);
+        color: var(--accent);
+      }
+
+      /* DONUT CHART CARD */
+      .chart-card {
+        grid-column: 3 / 4;
+      }
+      .chart-wrap {
+        position: relative;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 1rem 0;
+      }
+      .chart-center {
+        position: absolute;
+        text-align: center;
+        pointer-events: none;
+      }
+      .chart-center-num {
+         font-family: "Open Sans", sans-serif;
+        font-size: 1.5rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        color: var(--adc);
+      }
+      .chart-center-label {
+        font-size: 0.65rem;
+        color: var(--muted);
+        font-family: "Open Sans", monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .chart-legend {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        margin-top: 0.75rem;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.78rem;
+      }
+      .legend-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        flex-shrink: 0;
+      }
+      .legend-pct {
+        font-family: "Open Sans", monospace;
+        font-size: 0.72rem;
+        color: var(--muted);
+      }
+
+      /* PROGRESS CARD */
+      .progress-card {
+        grid-column: 1 / 2;
+      }
+      .progress-list {
+        margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .prog-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+      }
+      .prog-name {
+        font-size: 0.82rem;
+        font-weight: 500;
+      }
+      .prog-pct {
+        font-family: "Open Sans", monospace;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+      .prog-bar {
+        height: 5px;
+        background: var(--border);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .prog-fill {
+        height: 100%;
+        border-radius: 3px;
+        background: var(--accent);
+        transition: width 1.8s ease;
+      }
+      .prog-fill.accent2 {
+        background: var(--accent2);
+      }
+      .prog-fill.gold {
+        background: var(--gold);
+      }
+      .prog-fill.red {
+        background: var(--red);
+      }
+      .card {
+          box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+
+      /* INCIDENT FEED */
+      .incident-card {
+        grid-column: 2 / 4;
+      }
+      .incident-list {
+        margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+      }
+      .incident-item {
+        display: flex;
+        gap: 12px;
+        padding: 11px 0;
+        border-bottom: 1px solid rgba(26, 46, 58, 0.6);
+        align-items: flex-start;
+      }
+      .incident-item:last-child {
+        border-bottom: none;
+      }
+      .inc-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.78rem;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+      .inc-icon.warn {
+        background: rgba(244, 200, 66, 0.12);
+        color: var(--gold);
+      }
+      .inc-icon.info {
+        background: rgba(0, 180, 216, 0.12);
+        color: var(--accent2);
+      }
+      .inc-icon.ok {
+        background: rgba(0, 229, 160, 0.12);
+        color: var(--accent);
+      }
+      .inc-icon.alert {
+        background: rgba(255, 75, 92, 0.12);
+        color: var(--red);
+      }
+      .inc-title {
+        font-size: 0.82rem;
+        font-weight: 500;
+        margin-bottom: 2px;
+      }
+      .inc-meta {
+        font-family: "Open Sans", monospace;
+        font-size: 0.65rem;
+        color: var(--muted);
+      }
+
+      /* STATES MINI GRID */
+      .states-card {
+        grid-column: 1 / -1;
+      }
+      .states-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 6px;
+        margin-top: 1rem;
+      }
+      .state-chip {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 8px 10px;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-align: center;
+      }
+      .state-chip:hover {
+        border-color: var(--accent);
+        background: rgba(0, 168, 107, 0.08);
+      }
+      .state-chip.reported {
+        border-color: rgba(0, 229, 160, 0.25);
+      }
+      .state-chip.partial {
+        border-color: rgba(244, 200, 66, 0.25);
+      }
+      .state-chip-name {
+        font-size: 0.7rem;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .state-chip-pct {
+        font-family: "Open Sans", monospace;
+        font-size: 0.62rem;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .state-chip.reported .state-chip-pct {
+        color: var(--accent);
+      }
+      .state-chip.partial .state-chip-pct {
+        color: var(--gold);
+      }
+
+      /* TICKER */
+      .ticker {
+      background: #ffffff;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        overflow: hidden;
+        white-space: nowrap;
+        padding: 8px 0;
+        position: relative;
+      }
+      .ticker::before,
+      .ticker::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 80px;
+        z-index: 2;
+      }
+      .ticker::before {
+        left: 0;
+        background: linear-gradient(to right, #ffffff, transparent);
+      }
+      .ticker::after {
+        right: 0;
+        background: linear-gradient(to left, #ffffff, transparent);
+      }
+      .ticker-inner {
+        display: inline-flex;
+        gap: 3rem;
+        animation: ticker 35s linear infinite;
+      }
+      @keyframes ticker {
+        0% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(-50%);
+        }
+      }
+      .tick-item {
+        font-family: "Open Sans", monospace;
+        font-size: 0.7rem;
+        color: var(--muted);
+      }
+      .tick-item .tick-party {
+        font-weight: 500;
+        color: var(--text);
+      }
+      .tick-item .tick-votes {
+        color: var(--accent);
+      }
+
+      /* FOOTER */
+      footer {
+        text-align: center;
+        padding: 2rem;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-family: "Open Sans", monospace;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* RESPONSIVE */
+      @media (max-width: 1100px) {
+        .content {
+          grid-template-columns: 1fr 1fr;
+        }
+        .party-card {
+          grid-column: 1 / -1;
+        }
+        .chart-card {
+          grid-column: 1 / 2;
+        }
+        .progress-card {
+          grid-column: 2 / 3;
+        }
+        .incident-card {
+          grid-column: 1 / -1;
+        }
+        .stat-cards {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      @media (max-width: 700px) {
+        .content {
+          grid-template-columns: 1fr;
+          padding: 1rem;
+        }
+        .party-card,
+        .chart-card,
+        .progress-card,
+        .incident-card {
+          grid-column: 1;
+        }
+        .stat-cards {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .hero-inner {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .election-meta {
+          flex-direction: row;
+        }
+        .meta-item {
+          text-align: left;
+        }
+        .nav-links {
+          display: none;
+        }
+        .leading-stats {
+          gap: 1rem;
+        }
+        .leading-pct-num {
+          font-size: 1.6rem;
+        }
+      }
+
+      /* ANIMATIONS */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .card,
+      .stat-card {
+        animation: fadeUp 0.4s ease both;
+      }
+      .stat-cards .stat-card:nth-child(1) {
+        animation-delay: 0.05s;
+      }
+      .stat-cards .stat-card:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      .stat-cards .stat-card:nth-child(3) {
+        animation-delay: 0.15s;
+      }
+      .stat-cards .stat-card:nth-child(4) {
+        animation-delay: 0.2s;
+      }
+      .stat-cards .stat-card:nth-child(5) {
+        animation-delay: 0.25s;
+      }
+      .stat-cards .stat-card:nth-child(6) {
+        animation-delay: 0.3s;
+      }
+      .leading-box {
+        animation: fadeUp 0.5s ease both;
+        animation-delay: 0.1s;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="logo">
+        <div class="logo-mark">VR</div>
+        V-<span>Rec</span>
+      </div>
+      <nav class="nav-links">
+        <a href="vrec-dashboard.html" class="active">Dashboard</a>
+        <a href="vrec-state-results.html">States</a>
+        <a href="vrec-lga-results.html">LGAs</a>
+        <a href="vrec-charts.html">Charts</a>
+        <a href="vrec-progress.html">Progress</a>
+      </nav>
+      <div class="topbar-right">
+        <div class="live-badge">
+          <div class="live-dot"></div>
+          LIVE
+        </div>
+        <div class="clock" id="clock">--:--:--</div>
+        <a href="#" class="btn-login">Admin / Agent →</a>
+      </div>
+    </header>
+
+    <!-- TICKER -->
+    <div class="ticker" style="margin-top: 56px">
+      <div class="ticker-inner" id="ticker"></div>
+    </div>
+
+    <main>
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-inner">
+          <div>
+            <div class="hero-title">
+              2027 Presidential Election<br /><span>Results Intelligence</span>
+            </div>
+            <div class="hero-sub">
+              Real-time collation · Nigeria · V-Rec Monitoring Platform
+            </div>
+          </div>
+          <div class="election-meta">
+            <div class="meta-item">
+              <div class="meta-label">Election Date</div>
+              <div class="meta-value">Feb 15, 2027</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Last Updated</div>
+              <div class="meta-value accent" id="last-updated">--:--</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-label">Reporting</div>
+              <div class="meta-value gold">68.4%</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CURRENTLY LEADING BANNER -->
+      <div class="leading-banner-wrap">
+        <div class="leading-banner">
+          <div class="leading-box">
+            <div class="leading-crown">
+              <i class="fas fa-crown"></i>
+            </div>
+            <div class="leading-info">
+              <div class="leading-eyebrow">
+                <i
+                  class="fas fa-signal"
+                  style="margin-right: 5px; font-size: 0.55rem"
+                ></i
+                >Currently Leading — National
+              </div>
+              <div class="leading-party-name">ADC</div>
+              <div class="leading-detail">
+                African Democratic Congress &nbsp;·&nbsp; 9,561,852 votes
+                counted across 29 states
+              </div>
+            </div>
+            <div class="leading-stats">
+              <div class="leading-pct">
+                <div class="leading-pct-num">37.4%</div>
+                <div class="leading-pct-label">Vote Share</div>
+              </div>
+              <div class="leading-margin">
+                <div class="leading-margin-num">+9.1%</div>
+                <div class="leading-margin-label">ahead of APC</div>
+              </div>
+            </div>
+            <div class="leading-pulse"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTENT GRID -->
+      <div class="content">
+        <!-- STAT CARDS ROW — now 6 cards -->
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-icon white">
+              <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div class="stat-num white">120,847</div>
+            <div class="stat-label">Total Polling Units</div>
+            <div class="stat-change">↑ Nationwide</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange"><i class="fas fa-building"></i></div>
+            <div class="stat-num orange">342,190</div>
+            <div class="stat-label">Total Voting Points</div>
+            <div class="stat-change">~2.8 per polling unit</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-num">82,659</div>
+            <div class="stat-label">Units Reported</div>
+            <div class="stat-change">68.4% complete</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <i class="fas fa-hourglass-half"></i>
+            </div>
+            <div class="stat-num blue">38,188</div>
+            <div class="stat-label">Yet to Report</div>
+            <div class="stat-change neg">31.6% pending</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon gold"><i class="fas fa-vote-yea"></i></div>
+            <div class="stat-num gold">24,312,445</div>
+            <div class="stat-label">Total Votes Cast</div>
+            <div class="stat-change">↑ Accredited voters</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-num red">412</div>
+            <div class="stat-label">Flagged Anomalies</div>
+            <div class="stat-change neg">Under review</div>
+          </div>
+        </div>
+
+        <!-- PARTY STANDINGS -->
+        <div class="card party-card">
+          <div
+            class="card-accent-line"
+            style="background: linear-gradient(90deg, var(--adc), transparent)"
+          ></div>
+          <div class="card-label">
+            <i
+              class="fas fa-trophy"
+              style="margin-right: 5px; color: var(--adc)"
+            ></i
+            >Party Standings · Live Vote Count
+          </div>
+          <table class="party-table">
+            <thead>
+              <tr>
+                <th>Party</th>
+                <th>Votes</th>
+                <th>Share</th>
+                <th>States</th>
+                <th>Rank</th>
+              </tr>
+            </thead>
+            <tbody id="party-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- DONUT CHART -->
+        <div class="card chart-card">
+          <div
+            class="card-accent-line"
+            style="background: linear-gradient(90deg, var(--adc), transparent)"
+          ></div>
+          <div class="card-label">
+            <i
+              class="fas fa-chart-pie"
+              style="margin-right: 5px; color: var(--accent2)"
+            ></i
+            >Vote Distribution
+          </div>
+          <div class="chart-wrap">
+            <canvas id="donutChart" width="180" height="180"></canvas>
+            <div class="chart-center">
+              <div class="chart-center-num">ADC</div>
+              <div class="chart-center-label">Leading</div>
+            </div>
+          </div>
+          <div class="chart-legend" id="chart-legend"></div>
+        </div>
+
+        <!-- REPORTING PROGRESS -->
+        <div class="card progress-card">
+          <div
+            class="card-accent-line"
+            style="
+              background: linear-gradient(90deg, var(--accent), transparent);
+            "
+          ></div>
+          <div class="card-label">
+            <i
+              class="fas fa-tasks"
+              style="margin-right: 5px; color: var(--accent)"
+            ></i
+            >Reporting Progress · By Zone
+          </div>
+          <div class="progress-list" id="progress-list"></div>
+        </div>
+
+        <!-- INCIDENT FEED -->
+        <div class="card incident-card">
+          <div
+            class="card-accent-line"
+            style="background: linear-gradient(90deg, var(--red), transparent)"
+          ></div>
+          <div class="card-label">
+            <i
+              class="fas fa-shield-alt"
+              style="margin-right: 5px; color: var(--red)"
+            ></i
+            >Transparency Feed · Recent Activity
+          </div>
+          <div class="incident-list" id="incident-list"></div>
+        </div>
+
+        <!-- STATES GRID -->
+        <div class="card states-card">
+          <div
+            class="card-accent-line"
+            style="
+              background: linear-gradient(
+                90deg,
+                var(--adc),
+                var(--accent),
+                transparent
+              );
+            "
+          ></div>
+          <div class="card-label">
+            <i
+              class="fas fa-map"
+              style="margin-right: 5px; color: var(--gold)"
+            ></i
+            >All States · Reporting Status (click for details)
+          </div>
+          <div class="states-grid" id="states-grid"></div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      V-Rec · Nigeria Election Intelligence Platform · MVP Demo · Data shown is
+      simulated for demonstration purposes
+    </footer>
+
+    <script>
+      // ── DATA ──────────────────────────────────────────
+      const parties = [
+        {
+          name: "ADC",
+          fullName: "African Democratic Congress",
+          color: "#FF6B00",
+          votes: 9_561_852,
+          states: 29,
+          pct: 37.4,
+        },
+        {
+          name: "APC",
+          fullName: "All Progressives Congress",
+          color: "#0080FF",
+          votes: 7_123_420,
+          states: 4,
+          pct: 28.3,
+        },
+        {
+          name: "PDP",
+          fullName: "People's Democratic Party",
+          color: "#E80020",
+          votes: 4_812_990,
+          states: 2,
+          pct: 18.7,
+        },
+        {
+          name: "LP",
+          fullName: "Labour Party",
+          color: "#228B22",
+          votes: 2_218_880,
+          states: 1,
+          pct: 8.6,
+        },
+        {
+          name: "NNPP",
+          fullName: "New Nigeria Peoples Party",
+          color: "#8B5CF6",
+          votes: 1_750_200,
+          states: 1,
+          pct: 6.8,
+        },
+        {
+          name: "Others",
+          fullName: "Other Parties",
+          color: "#94A3B8",
+          votes: 845_103,
+          states: 0,
+          pct: 0.2,
+        },
+      ];
+
+      const zones = [
+        { name: "North-West", pct: 82, cls: "" },
+        { name: "North-East", pct: 74, cls: "accent2" },
+        { name: "North-Central", pct: 65, cls: "" },
+        { name: "South-West", pct: 71, cls: "" },
+        { name: "South-East", pct: 58, cls: "red" },
+        { name: "South-South", pct: 63, cls: "gold" },
+      ];
+
+      const incidents = [
+        {
+          type: "warn",
+          icon: "fa-triangle-exclamation",
+          title: "Anomaly flagged — Kano LGA 004",
+          meta: "14:32 · Auto-detected · Under review",
+        },
+        {
+          type: "ok",
+          icon: "fa-circle-check",
+          title: "Ward collation approved — Lagos Island",
+          meta: "14:28 · Supervisor confirmed",
+        },
+        {
+          type: "alert",
+          icon: "fa-circle-xmark",
+          title: "Submission rejected — duplicate entry",
+          meta: "14:21 · Rivers State · Agent retrying",
+        },
+        {
+          type: "info",
+          icon: "fa-circle-info",
+          title: "Ogun State — 70% units now reported",
+          meta: "14:17 · Automated milestone alert",
+        },
+        {
+          type: "ok",
+          icon: "fa-circle-check",
+          title: "Abuja FCT — final results verified",
+          meta: "14:09 · Senior admin approved",
+        },
+        {
+          type: "warn",
+          icon: "fa-wifi",
+          title: "Network delay — Borno (22 units offline)",
+          meta: "14:02 · Queued for auto-sync",
+        },
+      ];
+
+      const states = [
+        "Abia",
+        "Adamawa",
+        "Akwa Ibom",
+        "Anambra",
+        "Bauchi",
+        "Bayelsa",
+        "Benue",
+        "Borno",
+        "Cross River",
+        "Delta",
+        "Ebonyi",
+        "Edo",
+        "Ekiti",
+        "Enugu",
+        "Gombe",
+        "Imo",
+        "Jigawa",
+        "Kaduna",
+        "Kano",
+        "Katsina",
+        "Kebbi",
+        "Kogi",
+        "Kwara",
+        "Lagos",
+        "Nasarawa",
+        "Niger",
+        "Ogun",
+        "Ondo",
+        "Osun",
+        "Oyo",
+        "Plateau",
+        "Rivers",
+        "Sokoto",
+        "Taraba",
+        "Yobe",
+        "Zamfara",
+        "FCT",
+      ];
+
+      const stateData = states.map((s) => ({
+        name: s,
+        pct: Math.floor(Math.random() * 85) + 10,
+        status:
+          Math.random() > 0.55
+            ? "reported"
+            : Math.random() > 0.4
+              ? "partial"
+              : "pending",
+      }));
+
+      // ── CLOCK ──────────────────────────────────────────
+      function updateClock() {
+        const t = new Date().toLocaleTimeString("en-NG", { hour12: false });
+        document.getElementById("clock").textContent = t;
+        document.getElementById("last-updated").textContent = t;
+      }
+      setInterval(updateClock, 1000);
+      updateClock();
+
+      // ── TICKER ──────────────────────────────────────────
+      function buildTicker() {
+        const items = [
+          ...parties.map(
+            (p) =>
+              `<span class="tick-item"><span class="tick-party">${p.name}</span> <span class="tick-votes">${p.votes.toLocaleString()}</span> votes · ${p.pct}%</span>`,
+          ),
+          `<span class="tick-item">82,659 of 120,847 polling units reported</span>`,
+          `<span class="tick-item">342,190 total voting points tracked</span>`,
+          `<span class="tick-item">Anomalies detected: <span class="tick-votes">412</span></span>`,
+          `<span class="tick-item">Nationwide accreditation: 24.3M voters</span>`,
+          `<span class="tick-item">FCT fully reported ✓</span>`,
+          `<span class="tick-item">North-West leading at 82% completion</span>`,
+          `<span class="tick-item">ADC leads in 29 states — commanding majority</span>`,
+        ];
+        const doubled = [...items, ...items];
+        document.getElementById("ticker").innerHTML = doubled.join("");
+      }
+      buildTicker();
+
+      // ── PARTY TABLE ──────────────────────────────────────────
+      function buildPartyTable() {
+        const tbody = document.getElementById("party-tbody");
+        const max = parties[0].votes;
+        const rankLabels = ["1st", "2nd", "3rd", "4th", "5th", "6th"];
+        const rankCls = ["rank-1", "rank-2", "rank-3", "", "", ""];
+        tbody.innerHTML = parties
+          .map(
+            (p, i) => `
+    <tr>
+      <td>
+        <div class="party-name-cell">
+          <div class="party-dot" style="background:${p.color}"></div>
+          <span>${p.name}</span>
+        </div>
+      </td>
+      <td><span class="votes-num">${p.votes.toLocaleString()}</span></td>
+      <td>
+        <div class="bar-wrap">
+          <div class="mini-bar">
+            <div class="mini-bar-fill" data-w="${((p.votes / max) * 100).toFixed(1)}" style="background:${p.color};width:0%"></div>
+          </div>
+          <span class="pct-label">${p.pct}%</span>
+        </div>
+      </td>
+      <td><span class="votes-num">${p.states}</span></td>
+      <td><span class="rank-badge ${rankCls[i]}">${rankLabels[i]}</span></td>
+    </tr>
+  `,
+          )
+          .join("");
+
+        setTimeout(() => {
+          document.querySelectorAll(".mini-bar-fill").forEach((el) => {
+            el.style.width = el.dataset.w + "%";
+          });
+        }, 100);
+      }
+      buildPartyTable();
+
+      // ── DONUT CHART ──────────────────────────────────────────
+      function buildDonut() {
+        const ctx = document.getElementById("donutChart").getContext("2d");
+        new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: parties.map((p) => p.name),
+            datasets: [
+              {
+                data: parties.map((p) => p.pct),
+                backgroundColor: parties.map((p) => p.color),
+                borderWidth: 2,
+                borderColor: "#ffffff",
+                hoverBorderColor: "#ffffff",
+              },
+            ],
+          },
+          options: {
+            cutout: "68%",
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.parsed}%` },
+              },
+            },
+            animation: { duration: 1200, easing: "easeInOutQuart" },
+          },
+        });
+
+        const legend = document.getElementById("chart-legend");
+        legend.innerHTML = parties
+          .map(
+            (p) => `
+    <div class="legend-item">
+      <div class="legend-left">
+        <div class="legend-dot" style="background:${p.color}"></div>
+        <span style="font-size:0.78rem">${p.name}</span>
+      </div>
+      <span class="legend-pct">${p.pct}%</span>
+    </div>
+  `,
+          )
+          .join("");
+      }
+      buildDonut();
+
+      // ── PROGRESS LIST ──────────────────────────────────────────
+      function buildProgress() {
+        const el = document.getElementById("progress-list");
+        el.innerHTML = zones
+          .map(
+            (z) => `
+    <div class="prog-item">
+      <div class="prog-header">
+        <span class="prog-name">${z.name}</span>
+        <span class="prog-pct">${z.pct}%</span>
+      </div>
+      <div class="prog-bar">
+        <div class="prog-fill ${z.cls}" data-w="${z.pct}" style="width:0%"></div>
+      </div>
+    </div>
+  `,
+          )
+          .join("");
+        setTimeout(() => {
+          document.querySelectorAll(".prog-fill").forEach((el) => {
+            el.style.width = el.dataset.w + "%";
+          });
+        }, 150);
+      }
+      buildProgress();
+
+      // ── INCIDENTS ──────────────────────────────────────────
+      function buildIncidents() {
+        const el = document.getElementById("incident-list");
+        el.innerHTML = incidents
+          .map(
+            (i) => `
+    <div class="incident-item">
+      <div class="inc-icon ${i.type}"><i class="fas ${i.icon}"></i></div>
+      <div class="inc-body">
+        <div class="inc-title">${i.title}</div>
+        <div class="inc-meta">${i.meta}</div>
+      </div>
+    </div>
+  `,
+          )
+          .join("");
+      }
+      buildIncidents();
+
+      // ── STATES GRID ──────────────────────────────────────────
+      function buildStates() {
+        const el = document.getElementById("states-grid");
+        el.innerHTML = stateData
+          .map(
+            (s) => `
+    <div class="state-chip ${s.status}" onclick="alert('${s.name}: ${s.pct}% reported\\nClick → State Results Page (coming next)')">
+      <div class="state-chip-name">${s.name}</div>
+      <div class="state-chip-pct">${s.pct}%</div>
+    </div>
+  `,
+          )
+          .join("");
+      }
+      buildStates();
+    </script>
+  </body>
+</html>
